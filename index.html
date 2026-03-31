@@ -1,75 +1,130 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EclipseCopilot | Luau AI</title>
+    <title>EclipseCopilot | IA para Roblox Luau Gratuita</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="app-container">
-        <aside class="sidebar">
-            <div class="logo">
-                <i class="fas fa-moon"></i>
-                <span>EclipseCopilot</span>
+
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-moon"></i>
+            <span>Eclipse<span class="logo-light">Copilot</span></span>
+        </div>
+        <nav class="nav-links">
+            <a href="#about">Início</a>
+            <a href="#features">Recursos</a>
+            <a href="#dashboard" class="dashboard-btn">Painel <i class="fas fa-rocket"></i></a>
+        </nav>
+    </header>
+
+    <section id="about" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">O Fim da Era do <span class="neon-text">Ctrl+C / Ctrl+V</span> no Roblox.</h1>
+            <p class="hero-subtitle">Integração nativa com Roblox Studio. Otimização de Luau com um clique. Crie sistemas inteiros com prompts de IA.</p>
+            <p class="hero-subtitle free-badge">É totalmente gratuito e open-source.</p>
+            <div class="hero-btns">
+                <a href="#dashboard" class="btn primary-btn">Abrir Painel <i class="fas fa-magic"></i></a>
+                <a href="#features" class="btn secondary-btn">Como Funciona</a>
             </div>
-            
+        </div>
+        <div class="hero-media">
+            <img src="https://i.imgur.com/8m4QW2X.png" alt="Exemplo de interface Roblox Studio com EclipseCopilot"> </div>
+    </section>
+
+    <section id="features" class="features">
+        <h2 class="section-title">Não é apenas um Chatbot.</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <i class="fas fa-sync-alt feature-icon"></i>
+                <h3>Sincronização Ativa</h3>
+                <p>O plugin envia o código selecionado diretamente para o painel.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-tachometer-alt feature-icon"></i>
+                <h3>Otimização em um Clique</h3>
+                <p>Reduza loops desnecessários e use melhores práticas de Luau (Task lib, Attributes).</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-bug feature-icon"></i>
+                <h3>Debug Inteligente</h3>
+                <p>Identifique erros e memory leaks rapidamente com a IA.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="dashboard" class="dashboard hidden-init">
+        <div class="dashboard-sidebar">
             <nav class="nav-menu">
-                <button class="nav-item active" onclick="switchTab('chat')"><i class="fas fa-comment-code"></i> Chat IA</button>
-                <button class="nav-item" onclick="switchTab('editor')"><i class="fas fa-file-code"></i> Editor</button>
-                <button class="nav-item" onclick="switchTab('history')"><i class="fas fa-history"></i> Histórico</button>
+                <button class="nav-item active" onclick="switchDashboardTab('editor')"><i class="fas fa-file-code"></i> Editor de Código</button>
+                <button class="nav-item" onclick="switchDashboardTab('settings')"><i class="fas fa-cog"></i> Configurações</button>
             </nav>
+            <div class="token-info">Tokens Aprox: <span id="token-counter">0</span></div>
+            <div class="api-status">API: <span id="api-status-light" class="status-offline"></span></div>
+        </div>
 
-            <div class="tools-section">
-                <p class="section-label">Ações Rápidas</p>
-                <button class="tool-btn" onclick="quickAction('Fix Script')"><i class="fas fa-magic"></i> Fix Script</button>
-                <button class="tool-btn" onclick="quickAction('Optimize')"><i class="fas fa-bolt"></i> Optimize</button>
-                <button class="tool-btn" onclick="quickAction('Explain')"><i class="fas fa-book-open"></i> Explain</button>
-                <button class="tool-btn" onclick="quickAction('Debug')"><i class="fas fa-bug"></i> Debug Script</button>
-            </div>
+        <div class="dashboard-content">
+            
+            <div id="dashboard-editor" class="dashboard-tab active">
+                <div class="editor-layout">
+                    
+                    <div class="editor-col input-col">
+                        <div class="editor-panel-header">
+                            <span>Sincronizado do Studio</span>
+                            <div class="editor-actions">
+                                <button onclick="clearEditor()" class="icon-btn"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="editor-wrapper">
+                            <div class="line-numbers" id="line-numbers">1</div>
+                            <textarea id="code-editor" spellcheck="false" placeholder="Use o plugin ou cole seu código Luau aqui..."></textarea>
+                        </div>
+                    </div>
 
-            <div class="settings-box">
-                <input type="password" id="api-key" placeholder="Groq API Key" onchange="saveKey()">
-                <div class="token-info">Tokens: <span id="token-counter">0</span></div>
-            </div>
-        </aside>
-
-        <main class="main-content">
-            <div id="chat-tab" class="tab-content active">
-                <div class="chat-container" id="chat-messages">
-                    <div class="msg ai">Bem-vindo ao <b>EclipseCopilot</b>. Como posso ajudar no seu projeto Roblox hoje?</div>
-                </div>
-                <div class="input-container">
-                    <div id="loading-indicator" class="loading hidden">Eclipse está pensando...</div>
-                    <div class="input-area">
-                        <textarea id="user-input" placeholder="Pergunte algo ou use --ai: no editor..."></textarea>
-                        <button id="send-btn" onclick="handleChat()"><i class="fas fa-paper-plane"></i></button>
+                    <div class="editor-col output-col">
+                        <div class="editor-panel-header">
+                            <span>Sugestão do <span class="neon-text">EclipseCopilot</span></span>
+                        </div>
+                        <div class="editor-wrapper">
+                            <div class="line-numbers">1</div>
+                            <textarea id="response-editor" readonly class="response-field"></textarea>
+                            <div id="ai-loading" class="ai-loading hidden">Analisando... <i class="fas fa-circle-notch fa-spin"></i></div>
+                        </div>
+                        <div class="editor-panel-footer">
+                            <button onclick="copyResponseCode()" class="btn secondary-btn"><i class="fas fa-copy"></i> Copiar Código</button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="editor-tab" class="tab-content">
-                <div class="editor-toolbar">
-                    <span class="file-name">main.luau</span>
-                    <div class="editor-btns">
-                        <button onclick="copyCode()"><i class="fas fa-copy"></i> Copiar</button>
-                        <button onclick="clearEditor()"><i class="fas fa-trash"></i> Limpar</button>
-                    </div>
-                </div>
-                <div class="editor-wrapper">
-                    <div class="line-numbers" id="line-numbers"></div>
-                    <textarea id="code-editor" spellcheck="false"></textarea>
+                <div class="quick-actions">
+                    <button class="tool-btn fix" onclick="quickAction('Fix Script')"><i class="fas fa-magic"></i> Corrigir Erros</button>
+                    <button class="tool-btn optimize" onclick="quickAction('Optimize')"><i class="fas fa-bolt"></i> Otimizar Performance</button>
+                    <button class="tool-btn explain" onclick="quickAction('Explain')"><i class="fas fa-book-open"></i> Explicar Código</button>
+                    <button class="tool-btn refactor" onclick="quickAction('Refactor')"><i class="fas fa-code-branch"></i> Refatorar Estrutura</button>
                 </div>
             </div>
 
-            <div id="history-tab" class="tab-content">
-                <div class="history-list" id="history-list">
-                    <p style="padding: 20px; color: #666;">Nenhum histórico disponível.</p>
+            <div id="dashboard-settings" class="dashboard-tab">
+                <h3>Configurações de IA (Groq API)</h3>
+                <p>Para usar o painel, você precisa de uma chave API da Groq Cloud. É gratuita.</p>
+                <input type="password" id="api-key" placeholder="Coloque sua Groq API Key (gsk_...)" onchange="saveApiKey()">
+                <div class="settings-help">
+                    <p>1. Crie uma conta na <a href="https://console.groq.com/" target="_blank">Groq Console</a>.</p>
+                    <p>2. Gere uma nova API Key.</p>
+                    <p>3. Cole aqui. O site salva localmente no navegador (sem backend).</p>
                 </div>
             </div>
-        </main>
-    </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2024 EclipseCopilot. Criado por Roblox Devs para Roblox Devs.</p>
+        <p>Modelo de IA Recomendado: Llama3-70b-8192</p>
+    </footer>
+
     <script src="script.js"></script>
 </body>
 </html>
