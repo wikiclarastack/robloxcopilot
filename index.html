@@ -3,85 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EclipseCopilot | Advanced Luau AI</title>
+    <title>EclipseCopilot | Elite Luau AI</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <div id="app">
-        <section id="home" class="view">
-            <nav class="navbar">
-                <div class="logo">Eclipse<span>Copilot</span></div>
-                <div class="nav-links">
-                    <button onclick="nav('dashboard')" class="btn-primary glow-btn">Dashboard</button>
-                </div>
-            </nav>
-            <main class="hero">
-                <div class="hero-inner">
-                    <h1 class="reveal">The Future of <span class="accent">Roblox</span> Scripting.</h1>
-                    <p>Potencialize seu desenvolvimento com IA de elite dedicada ao ecossistema Luau.</p>
-                    <div class="hero-actions">
-                        <button onclick="nav('dashboard')" class="main-cta">Get Started</button>
-                    </div>
-                </div>
-                <div class="hero-visual">
-                    <div class="sphere"></div>
-                </div>
-            </main>
-        </section>
+    <div class="glow-overlay"></div>
+    
+    <section id="view-home" class="view">
+        <nav class="glass-nav">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fas fa-moon"></i></div>
+                <span class="logo-text">Eclipse<span>Copilot</span></span>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-link" onclick="scrollToSection('features')">Features</button>
+                <button class="nav-link" onclick="scrollToSection('faq')">FAQ</button>
+                <button class="btn-glow" onclick="switchView('dashboard')">Launch App <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </nav>
 
-        <section id="dashboard" class="view hidden">
+        <header class="hero">
+            <div class="hero-bg">
+                <div class="blob-1"></div>
+                <div class="blob-2"></div>
+            </div>
+            <div class="hero-content">
+                <div class="badge">V1.0.0 Stable</div>
+                <h1 class="gradient-text">Domine o Roblox com <br> Inteligência de Elite.</h1>
+                <p>O primeiro copiloto de código projetado especificamente para a arquitetura do Roblox Studio. Sem alucinações, apenas Luau puro e otimizado.</p>
+                <div class="hero-buttons">
+                    <button class="btn-main" onclick="switchView('dashboard')">Começar Agora</button>
+                    <button class="btn-outline" onclick="window.open('https://github.com', '_blank')">Documentação</button>
+                </div>
+            </div>
+        </header>
+
+        <section id="features" class="features-grid">
+            <div class="f-card">
+                <i class="fas fa-bolt"></i>
+                <h3>Turbo Speed</h3>
+                <p>Geração de scripts complexos em milissegundos usando Llama3.</p>
+            </div>
+            <div class="f-card">
+                <i class="fas fa-shield-halved"></i>
+                <h3>Clean Code</h3>
+                <p>Scripts validados contra memory leaks e loops infinitos.</p>
+            </div>
+            <div class="f-card">
+                <i class="fas fa-plug"></i>
+                <h3>Sync Plugin</h3>
+                <p>Envio direto para o Studio sem precisar copiar e colar.</p>
+            </div>
+        </section>
+    </section>
+
+    <section id="view-dashboard" class="view hidden">
+        <div class="dashboard-layout">
             <aside class="sidebar">
-                <div class="sidebar-header" onclick="nav('home')">
-                    <i class="fas fa-moon"></i> <span>Eclipse</span>
+                <div class="sidebar-top">
+                    <div class="logo-area" onclick="switchView('home')">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <nav class="side-nav">
+                        <button class="side-btn active" title="Editor"><i class="fas fa-code"></i></button>
+                        <button class="side-btn" title="Histórico"><i class="fas fa-clock-rotate-left"></i></button>
+                        <button class="side-btn" title="Configurações" onclick="toggleSettings()"><i class="fas fa-gear"></i></button>
+                    </nav>
                 </div>
-                <div class="sidebar-nav">
-                    <button class="side-item active"><i class="fas fa-terminal"></i> Editor</button>
-                    <button class="side-item" onclick="clearAll()"><i class="fas fa-trash"></i> Reset</button>
-                </div>
-                <div class="sidebar-footer">
-                    <select id="model-select" class="glass-select">
-                        <option value="llama3-70b-8192">Llama3 70B</option>
-                    </select>
-                    <input type="password" id="api-key" placeholder="Groq API Key" onchange="saveConfig()">
+                <div class="sidebar-bottom">
+                    <div class="user-avatar">S</div>
                 </div>
             </aside>
 
-            <main class="editor-view">
-                <header class="editor-header">
-                    <div class="breadcrumb">Dashboard / <span>Script Editor</span></div>
-                    <div class="status-badge" id="api-status">● Offline</div>
+            <main class="main-workspace">
+                <header class="workspace-header">
+                    <div class="file-info">
+                        <i class="fab fa-lua"></i>
+                        <span>main.luau</span>
+                    </div>
+                    <div class="workspace-actions">
+                        <select id="model-select" class="glass-select">
+                            <option value="llama3-70b-8192">Llama3 70B</option>
+                            <option value="llama3-8b-8192">Llama3 8B</option>
+                        </select>
+                        <button class="btn-icon" onclick="copyCode()" title="Copy Code"><i class="fas fa-copy"></i></button>
+                        <button class="btn-icon" onclick="clearWorkspace()" title="Clear"><i class="fas fa-trash-can"></i></button>
+                    </div>
                 </header>
 
-                <div class="editor-grid">
-                    <div class="panel">
-                        <div class="panel-label">Input Source</div>
-                        <div class="code-container">
-                            <div class="lines" id="ln-input">1</div>
-                            <textarea id="input-editor" placeholder="-- Insira seu código ou prompt aqui..."></textarea>
+                <div class="editor-section">
+                    <div class="editor-pane source">
+                        <div class="pane-header">Input Prompt / Source</div>
+                        <div class="editor-container">
+                            <div class="line-numbers" id="ln-in"></div>
+                            <textarea id="editor-input" spellcheck="false" placeholder="-- Digite o que deseja criar ou cole um script para analisar..."></textarea>
                         </div>
                     </div>
-                    <div class="panel result-panel">
-                        <div class="panel-label">AI Output</div>
-                        <div class="code-container">
-                            <div class="lines" id="ln-output">1</div>
-                            <textarea id="output-editor" readonly placeholder="Aguardando comando..."></textarea>
-                            <div id="loader" class="loader hidden">
-                                <div class="spinner"></div>
+                    <div class="editor-pane output">
+                        <div class="pane-header">Eclipse Output</div>
+                        <div class="editor-container">
+                            <div class="line-numbers" id="ln-out"></div>
+                            <textarea id="editor-output" readonly placeholder="Aguardando comando..."></textarea>
+                            <div id="ai-loader" class="loader hidden">
+                                <div class="scanner"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="action-bar">
-                    <button class="action-btn glow-purple" onclick="runAI('Fix errors and optimize this script')"><i class="fas fa-magic"></i> Auto-Fix</button>
-                    <button class="action-btn glow-blue" onclick="runAI('Refactor this code using modern Luau standards')"><i class="fas fa-code"></i> Refactor</button>
-                    <button class="action-btn" onclick="runAI('Explain every part of this script')"><i class="fas fa-microscope"></i> Explain</button>
-                    <button class="btn-send" onclick="runAI()"><i class="fas fa-paper-plane"></i> Generate</button>
-                </div>
+                <footer class="workspace-footer">
+                    <div class="quick-tools">
+                        <button onclick="sendAction('Fix this script')">Fix Errors</button>
+                        <button onclick="sendAction('Optimize performance and readability')">Optimize</button>
+                        <button onclick="sendAction('Add comments and documentation')">Document</button>
+                        <button onclick="sendAction('Refactor into modular services')">Refactor</button>
+                    </div>
+                    <button class="btn-generate" onclick="generate()">Generate Script <i class="fas fa-wand-magic-sparkles"></i></button>
+                </footer>
             </main>
-        </section>
-    </div>
+        </div>
+
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content glass">
+                <h3>Settings</h3>
+                <label>Groq API Key</label>
+                <input type="password" id="api-key-input" class="glass-input">
+                <button class="btn-main" onclick="toggleSettings()">Close</button>
+            </div>
+        </div>
+    </section>
+
     <script src="script.js"></script>
 </body>
 </html>
