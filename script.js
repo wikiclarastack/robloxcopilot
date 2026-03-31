@@ -74,7 +74,7 @@ const copyPluginBtn = $('copyPluginBtn');
 // ── Init from localStorage ─────────────────────────
 (function init() {
   const key = localStorage.getItem('groq_key') || '';
-  const mdl = localStorage.getItem('groq_model') || 'llama3-70b-8192';
+  const mdl = localStorage.getItem('groq_model') || 'llama-3.1-8b-instant';
   if (key) { apiKeyInput.value = key; setApiStatus(true); }
   modelSelect.value = mdl;
   modelBadge.textContent = mdl.split('-').slice(0,2).join('-');
