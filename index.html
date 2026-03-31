@@ -1,96 +1,588 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EclipseCopilot // Advanced Roblox AI</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eclipse COPILOT — Roblox AI Dev Platform</title>
+  <meta name="description" content="AI-powered Roblox Luau development platform with intelligent code editing, script analysis, exploit scanning, and multi-model Groq integration." />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <section id="view-landing" class="view">
-        <nav class="l-nav">
-            <div class="logo">Eclipse<span>Copilot</span></div>
-            <button class="btn-enter" onclick="switchView('app')">Dashboard <i class="fas fa-arrow-right"></i></button>
-        </nav>
-        <div class="l-hero">
-            <div class="hero-content">
-                <span class="badge">Next-Gen Luau AI</span>
-                <h1>Code faster than <br><span class="highlight">ever before.</span></h1>
-                <p>O Eclipse transforma suas ideias em scripts otimizados para Roblox Studio em segundos. Sem bugs, sem enrolação.</p>
-                <div class="h-btns">
-                    <button class="btn-p" onclick="switchView('app')">Start Scripting</button>
-                    <button class="btn-s">View Docs</button>
-                </div>
+
+<div id="app">
+
+  <!-- ═══════ TITLE BAR ═══════ -->
+  <header class="titlebar">
+    <div class="titlebar-logo">
+      <div class="logo-icon">E</div>
+      <span class="logo-text">ECLIPSE COPILOT</span>
+    </div>
+    <div class="titlebar-center">Roblox Luau AI Development Platform</div>
+    <div class="titlebar-model-badge">
+      <span class="pulse-dot"></span>
+      <span id="active-model-name">Llama 3.3 70B</span>
+    </div>
+  </header>
+
+  <!-- ═══════ MAIN LAYOUT ═══════ -->
+  <div class="main-layout">
+
+    <!-- ─── Sidebar ─── -->
+    <aside class="sidebar" id="sidebar">
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Main</div>
+        <button class="nav-item active" data-panel="chat" id="nav-chat">
+          <span class="nav-icon">💬</span>
+          <span class="nav-label">AI Chat</span>
+        </button>
+        <button class="nav-item" data-panel="editor" id="nav-editor">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">Code Editor</span>
+        </button>
+
+        <div class="sidebar-section-label">Analysis</div>
+        <button class="nav-item" data-panel="analyzer" id="nav-analyzer">
+          <span class="nav-icon">🔍</span>
+          <span class="nav-label">Script Analyzer</span>
+        </button>
+        <button class="nav-item" data-panel="exploit" id="nav-exploit">
+          <span class="nav-icon">🛡️</span>
+          <span class="nav-label">Exploit Scanner</span>
+        </button>
+        <button class="nav-item" data-panel="project" id="nav-project">
+          <span class="nav-icon">📂</span>
+          <span class="nav-label">Project Analyzer</span>
+        </button>
+
+        <div class="sidebar-section-label">Tools</div>
+        <button class="nav-item" data-panel="generator" id="nav-generator">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-label">System Generator</span>
+        </button>
+        <button class="nav-item" data-panel="refactor" id="nav-refactor">
+          <span class="nav-icon">🔧</span>
+          <span class="nav-label">Script Refactor</span>
+        </button>
+        <button class="nav-item" data-panel="debug" id="nav-debug">
+          <span class="nav-icon">🐛</span>
+          <span class="nav-label">Auto Debug</span>
+        </button>
+
+        <div class="sidebar-section-label">System</div>
+        <button class="nav-item" data-panel="settings" id="nav-settings">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Settings</span>
+        </button>
+        <button class="nav-item" data-panel="history" id="nav-history">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">History</span>
+          <span class="nav-badge" id="history-count">0</span>
+        </button>
+      </nav>
+      <div class="sidebar-toggle">
+        <button id="toggle-sidebar" title="Toggle Sidebar">◀</button>
+      </div>
+    </aside>
+
+    <!-- ─── Content Area ─── -->
+    <main class="content-area">
+
+      <!-- ═══ AI CHAT PANEL ═══ -->
+      <div class="panel active" id="panel-chat">
+        <div class="panel-header">
+          <h2>💬 AI Chat</h2>
+          <div class="header-actions">
+            <div class="model-selector">
+              <select id="chat-model-select">
+                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
+                <option value="meta-llama/llama-3.1-8b-instant">Llama 3.1 8B</option>
+                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
+                <option value="meta-llama/llama-guard-4-12b">GPT-OSS 120B</option>
+              </select>
             </div>
+            <button class="btn btn-ghost btn-icon" id="clear-chat" title="Clear Chat">🗑️</button>
+          </div>
         </div>
-    </section>
 
-    <section id="view-app" class="view hidden">
-        <div class="sidebar">
-            <div class="s-logo" onclick="switchView('landing')"><i class="fas fa-adjust"></i></div>
-            <nav>
-                <button class="s-nav active" onclick="showTab('editor')"><i class="fas fa-code"></i></button>
-                <button class="s-nav" onclick="showTab('settings')"><i class="fas fa-sliders"></i></button>
-            </nav>
-            <div id="api-status" class="status-indicator"></div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-welcome" id="chat-welcome">
+            <div class="welcome-icon">🚀</div>
+            <h3>Eclipse COPILOT</h3>
+            <p>Your AI-powered Roblox Luau development assistant. Ask me to generate scripts, analyze code, debug issues, or create complete game systems.</p>
+            <div class="chat-suggestions">
+              <button class="suggestion-chip" data-prompt="Create a complete pet system with hatching, leveling, and inventory">
+                <span class="chip-icon">🐾</span> Pet System
+              </button>
+              <button class="suggestion-chip" data-prompt="Create an inventory system with UI, datastore saving, and item management">
+                <span class="chip-icon">🎒</span> Inventory System
+              </button>
+              <button class="suggestion-chip" data-prompt="Create a combat system with abilities, cooldowns, and damage calculation">
+                <span class="chip-icon">⚔️</span> Combat System
+              </button>
+              <button class="suggestion-chip" data-prompt="Create a leaderboard system with DataStore, UI ranking, and real-time updates">
+                <span class="chip-icon">🏆</span> Leaderboard
+              </button>
+              <button class="suggestion-chip" data-prompt="Explain how RemoteEvents and RemoteFunctions work in Roblox with examples">
+                <span class="chip-icon">📚</span> Explain Remotes
+              </button>
+              <button class="suggestion-chip" data-prompt="Create a shop system with in-game currency, product catalog, and purchase validation">
+                <span class="chip-icon">🛒</span> Shop System
+              </button>
+            </div>
+          </div>
         </div>
 
-        <main class="main-content">
-            <div id="tab-editor" class="tab active">
-                <header class="m-header">
-                    <div class="h-title">
-                        <h2>Script Editor</h2>
-                        <p>workspace / <b>main.luau</b></p>
-                    </div>
-                    <div class="h-controls">
-                        <select id="model-select">
-                            <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-                            <option value="llama-3.1-8b-instant">Llama 3.1 8B</option>
-                            <option value="qwen/qwen3-32b">Qwen 3 32B</option>
-                            <option value="openai/gpt-oss-120b">GPT-OSS 120B</option>
-                        </select>
-                        <button class="btn-tool" onclick="copyCode()"><i class="fas fa-copy"></i> Copy</button>
-                    </div>
-                </header>
-
-                <div class="editor-grid">
-                    <div class="card">
-                        <div class="card-head">Prompt</div>
-                        <textarea id="p-input" placeholder="O que vamos buildar hoje? Ex: Sistema de inventário com DataStore..."></textarea>
-                    </div>
-                    <div class="card">
-                        <div class="card-head">Output</div>
-                        <div class="code-area">
-                            <textarea id="p-output" readonly placeholder="Aguardando comando..."></textarea>
-                            <div id="loader" class="loader hidden"><div class="bar"></div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="action-bar">
-                    <div class="quick-actions">
-                        <button onclick="runAction('Fix')">Fix Bugs</button>
-                        <button onclick="runAction('Optimize')">Optimize</button>
-                        <button onclick="runAction('Refactor')">Refactor</button>
-                    </div>
-                    <button class="btn-gen" onclick="generate()">Generate <kbd>Ctrl+K</kbd></button>
-                </div>
+        <div class="chat-input-area">
+          <div class="chat-input-wrapper">
+            <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask Eclipse to generate, analyze, or explain Luau code..."></textarea>
+            <div class="chat-input-actions">
+              <button class="btn-icon" id="attach-code-btn" title="Attach editor code">📎</button>
+              <button class="send-btn" id="send-btn" title="Send message">▶</button>
             </div>
+          </div>
+          <div class="chat-meta">
+            <span class="token-counter" id="token-counter">0 tokens (est.)</span>
+            <span id="chat-status"></span>
+          </div>
+        </div>
+      </div>
 
-            <div id="tab-settings" class="tab">
-                <div class="settings-pane">
-                    <h3>Configurações</h3>
-                    <div class="field">
-                        <label>Groq API Key</label>
-                        <input type="password" id="api-key-input" onchange="saveKey()" placeholder="gsk_...">
-                        <span>Sua chave fica salva apenas no seu navegador.</span>
-                    </div>
-                </div>
+      <!-- ═══ CODE EDITOR PANEL ═══ -->
+      <div class="panel" id="panel-editor">
+        <div class="panel-header">
+          <h2>📝 Code Editor</h2>
+          <div class="header-actions">
+            <span class="editor-toolbar file-name" id="editor-filename">untitled.luau</span>
+            <button class="btn btn-secondary" id="btn-format">✨ Format</button>
+            <button class="btn btn-secondary" id="btn-analyze-editor">🔍 Analyze</button>
+            <button class="btn btn-secondary" id="btn-debug-editor">🐛 Debug</button>
+            <button class="btn btn-secondary" id="btn-copy-editor">📋 Copy</button>
+            <button class="btn btn-secondary" id="btn-download-editor">⬇️ Download</button>
+          </div>
+        </div>
+        <div class="editor-wrapper">
+          <div class="editor-container">
+            <div class="line-numbers" id="line-numbers"></div>
+            <textarea class="code-editor" id="code-editor" spellcheck="false" placeholder="-- Start coding in Luau...&#10;-- Type '-- ai: your request' for AI autocomplete&#10;&#10;local Players = game:GetService('Players')&#10;"></textarea>
+            <div class="editor-minimap" id="editor-minimap">
+              <div class="minimap-content" id="minimap-content"></div>
+              <div class="minimap-viewport" id="minimap-viewport"></div>
             </div>
-        </main>
-    </section>
+          </div>
+          <div class="editor-status">
+            <span class="status-item" id="editor-cursor-pos">Ln 1, Col 1</span>
+            <span class="status-item">Luau</span>
+            <span class="status-item">UTF-8</span>
+            <span class="status-item right" id="editor-lines-count">0 lines</span>
+          </div>
+        </div>
+      </div>
 
-    <script src="script.js"></script>
+      <!-- ═══ SCRIPT ANALYZER PANEL ═══ -->
+      <div class="panel" id="panel-analyzer">
+        <div class="panel-header">
+          <h2>🔍 Script Analyzer</h2>
+          <div class="header-actions">
+            <div class="model-selector">
+              <select id="analyzer-model-select">
+                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
+                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="analyzer-panel">
+          <div class="analyzer-input-area">
+            <label>Paste your Luau script below for analysis:</label>
+            <textarea class="analyzer-textarea" id="analyzer-code" placeholder="-- Paste your script here..."></textarea>
+            <div class="analyzer-actions">
+              <button class="btn btn-primary" id="btn-run-analyzer">🔍 Run Analysis</button>
+              <button class="btn btn-secondary" id="btn-paste-from-editor-analyzer">📋 Paste from Editor</button>
+              <button class="btn btn-ghost" id="btn-clear-analyzer">Clear</button>
+            </div>
+          </div>
+          <div class="analyzer-results" id="analyzer-results">
+            <div class="empty-state">
+              <div class="empty-icon">🔍</div>
+              <h4>No Analysis Yet</h4>
+              <p>Paste a script and click "Run Analysis" to detect errors, bad practices, memory leaks, and performance issues.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ EXPLOIT SCANNER PANEL ═══ -->
+      <div class="panel" id="panel-exploit">
+        <div class="panel-header">
+          <h2>🛡️ Exploit Scanner</h2>
+          <div class="header-actions">
+            <div class="model-selector">
+              <select id="exploit-model-select">
+                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
+                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="analyzer-panel">
+          <div class="analyzer-input-area">
+            <label>Paste your script to scan for security vulnerabilities:</label>
+            <textarea class="analyzer-textarea" id="exploit-code" placeholder="-- Paste your script here to scan for exploits..."></textarea>
+            <div class="analyzer-actions">
+              <button class="btn btn-primary" id="btn-run-exploit">🛡️ Scan for Exploits</button>
+              <button class="btn btn-secondary" id="btn-paste-from-editor-exploit">📋 Paste from Editor</button>
+              <button class="btn btn-ghost" id="btn-clear-exploit">Clear</button>
+            </div>
+          </div>
+          <div class="analyzer-results" id="exploit-results">
+            <div class="empty-state">
+              <div class="empty-icon">🛡️</div>
+              <h4>No Scan Results</h4>
+              <p>Paste a script and click "Scan for Exploits" to find insecure RemoteEvents, trust-client vulnerabilities, and exploit risks.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ PROJECT ANALYZER PANEL ═══ -->
+      <div class="panel" id="panel-project">
+        <div class="panel-header">
+          <h2>📂 Project Analyzer</h2>
+          <div class="header-actions">
+            <button class="btn btn-secondary" id="btn-add-project-script">+ Add Script</button>
+          </div>
+        </div>
+        <div class="analyzer-panel">
+          <div class="analyzer-input-area" style="max-height: 50%; overflow-y: auto;">
+            <label>Add multiple scripts for a full project analysis:</label>
+            <div class="project-scripts-list" id="project-scripts-list">
+              <div class="project-script-entry" data-index="0">
+                <div class="project-script-header">
+                  <input type="text" placeholder="Script name (e.g., ServerScriptService/Main)" />
+                  <button class="btn-icon" onclick="removeProjectScript(0)" title="Remove">✕</button>
+                </div>
+                <textarea placeholder="-- Paste script code here..."></textarea>
+              </div>
+            </div>
+            <div class="analyzer-actions">
+              <button class="btn btn-primary" id="btn-run-project">📂 Analyze Project</button>
+              <button class="btn btn-ghost" id="btn-clear-project">Clear All</button>
+            </div>
+          </div>
+          <div class="analyzer-results" id="project-results">
+            <div class="empty-state">
+              <div class="empty-icon">📂</div>
+              <h4>No Project Analysis</h4>
+              <p>Add multiple scripts and click "Analyze Project" to review architecture, find redundancies, and get improvement suggestions.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ SYSTEM GENERATOR PANEL ═══ -->
+      <div class="panel" id="panel-generator">
+        <div class="panel-header">
+          <h2>⚡ Game System Generator</h2>
+          <div class="header-actions">
+            <div class="model-selector">
+              <select id="generator-model-select">
+                <option value="meta-llama/llama-guard-4-12b">GPT-OSS 120B</option>
+                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
+                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="analyzer-panel">
+          <div class="analyzer-input-area">
+            <label>Choose a preset or describe the system you want to generate:</label>
+            <div class="system-presets" id="system-presets">
+              <button class="system-preset" data-system="pet">
+                <div class="preset-icon">🐾</div>
+                <div class="preset-name">Pet System</div>
+                <div class="preset-desc">Hatching, leveling, inventory, equipping</div>
+              </button>
+              <button class="system-preset" data-system="inventory">
+                <div class="preset-icon">🎒</div>
+                <div class="preset-name">Inventory System</div>
+                <div class="preset-desc">Items, stacking, UI, DataStore saving</div>
+              </button>
+              <button class="system-preset" data-system="combat">
+                <div class="preset-icon">⚔️</div>
+                <div class="preset-name">Combat System</div>
+                <div class="preset-desc">Abilities, cooldowns, damage, health</div>
+              </button>
+              <button class="system-preset" data-system="skills">
+                <div class="preset-icon">✨</div>
+                <div class="preset-name">Skills System</div>
+                <div class="preset-desc">Skill tree, XP, upgrades, effects</div>
+              </button>
+              <button class="system-preset" data-system="leaderboard">
+                <div class="preset-icon">🏆</div>
+                <div class="preset-name">Leaderboard</div>
+                <div class="preset-desc">Rankings, DataStore, real-time UI</div>
+              </button>
+              <button class="system-preset" data-system="shop">
+                <div class="preset-icon">🛒</div>
+                <div class="preset-name">Shop System</div>
+                <div class="preset-desc">Currency, catalog, purchase validation</div>
+              </button>
+              <button class="system-preset" data-system="trading">
+                <div class="preset-icon">🤝</div>
+                <div class="preset-name">Trading System</div>
+                <div class="preset-desc">Player-to-player trades, confirmation</div>
+              </button>
+              <button class="system-preset" data-system="quest">
+                <div class="preset-icon">📜</div>
+                <div class="preset-name">Quest System</div>
+                <div class="preset-desc">Tasks, rewards, progress tracking</div>
+              </button>
+            </div>
+            <textarea class="analyzer-textarea" id="generator-custom" placeholder="Or describe a custom system... e.g., 'Create a gacha system with rarity tiers, pity system, and animated pulls'" style="min-height: 100px;"></textarea>
+            <div class="analyzer-actions">
+              <button class="btn btn-primary" id="btn-generate-system">⚡ Generate System</button>
+              <button class="btn btn-ghost" id="btn-clear-generator">Clear</button>
+            </div>
+          </div>
+          <div class="analyzer-results" id="generator-results">
+            <div class="empty-state">
+              <div class="empty-icon">⚡</div>
+              <h4>No System Generated</h4>
+              <p>Select a preset or describe a system to generate complete ModuleScripts, ServerScripts, LocalScripts, and RemoteEvents.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ SCRIPT REFACTOR PANEL ═══ -->
+      <div class="panel" id="panel-refactor">
+        <div class="panel-header">
+          <h2>🔧 Script Refactor</h2>
+          <div class="header-actions">
+            <div class="model-selector">
+              <select id="refactor-model-select">
+                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
+                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="analyzer-panel">
+          <div class="analyzer-input-area">
+            <label>Paste code to refactor — improve readability, split functions, create modules, and remove dead code:</label>
+            <textarea class="analyzer-textarea" id="refactor-code" placeholder="-- Paste messy code here for refactoring..."></textarea>
+            <div class="analyzer-actions">
+              <button class="btn btn-primary" id="btn-run-refactor">🔧 Refactor Script</button>
+              <button class="btn btn-secondary" id="btn-paste-from-editor-refactor">📋 Paste from Editor</button>
+              <button class="btn btn-ghost" id="btn-clear-refactor">Clear</button>
+            </div>
+          </div>
+          <div class="analyzer-results" id="refactor-results">
+            <div class="empty-state">
+              <div class="empty-icon">🔧</div>
+              <h4>No Refactoring Done</h4>
+              <p>Paste a script and click "Refactor" to improve its structure, readability, and modularity.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ AUTO DEBUG PANEL ═══ -->
+      <div class="panel" id="panel-debug">
+        <div class="panel-header">
+          <h2>🐛 Auto Debug</h2>
+          <div class="header-actions">
+            <div class="model-selector">
+              <select id="debug-model-select">
+                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
+                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="analyzer-panel">
+          <div class="analyzer-input-area">
+            <label>Paste code with bugs — Eclipse will identify errors, explain them, and suggest fixes:</label>
+            <textarea class="analyzer-textarea" id="debug-code" placeholder="-- Paste buggy code here..."></textarea>
+            <div class="analyzer-actions">
+              <button class="btn btn-primary" id="btn-run-debug">🐛 Debug Script</button>
+              <button class="btn btn-secondary" id="btn-paste-from-editor-debug">📋 Paste from Editor</button>
+              <button class="btn btn-ghost" id="btn-clear-debug">Clear</button>
+            </div>
+          </div>
+          <div class="analyzer-results" id="debug-results">
+            <div class="empty-state">
+              <div class="empty-icon">🐛</div>
+              <h4>No Debug Results</h4>
+              <p>Paste a script and click "Debug Script" to automatically identify errors, explain problems, and show corrections.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ SETTINGS PANEL ═══ -->
+      <div class="panel" id="panel-settings">
+        <div class="panel-header">
+          <h2>⚙️ Settings</h2>
+        </div>
+        <div class="settings-panel">
+
+          <div class="settings-group">
+            <h3>🔑 API Configuration</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">Groq API Key</div>
+                <div class="setting-desc">Your Groq Cloud API key for AI model access</div>
+              </div>
+              <input type="password" id="setting-api-key" placeholder="gsk_..." />
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3>🤖 Default Models</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">Code Generation</div>
+                <div class="setting-desc">Model used for generating new scripts and systems</div>
+              </div>
+              <select id="setting-model-generate">
+                <option value="meta-llama/llama-guard-4-12b">GPT-OSS 120B</option>
+                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
+                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
+                <option value="meta-llama/llama-3.1-8b-instant">Llama 3.1 8B</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">Code Correction</div>
+                <div class="setting-desc">Model used for fixing and debugging code</div>
+              </div>
+              <select id="setting-model-fix">
+                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
+                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
+                <option value="meta-llama/llama-guard-4-12b">GPT-OSS 120B</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">Autocomplete</div>
+                <div class="setting-desc">Model used for inline AI autocomplete</div>
+              </div>
+              <select id="setting-model-autocomplete">
+                <option value="meta-llama/llama-3.1-8b-instant">Llama 3.1 8B</option>
+                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">Explanations</div>
+                <div class="setting-desc">Model used for explaining code and concepts</div>
+              </div>
+              <select id="setting-model-explain">
+                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
+                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3>🎨 Editor</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">Font Size</div>
+                <div class="setting-desc">Editor code font size in pixels</div>
+              </div>
+              <input type="number" id="setting-font-size" value="13" min="10" max="24" />
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">Tab Size</div>
+                <div class="setting-desc">Number of spaces per indent</div>
+              </div>
+              <input type="number" id="setting-tab-size" value="2" min="1" max="8" />
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3>🔌 Roblox Plugin Integration</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">Plugin Server Port</div>
+                <div class="setting-desc">Local server port for Roblox Studio plugin communication</div>
+              </div>
+              <input type="number" id="setting-plugin-port" value="5500" min="1000" max="65535" />
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">Plugin Status</div>
+                <div class="setting-desc">The plugin server starts when Eclipse COPILOT loads</div>
+              </div>
+              <span style="color: var(--neon-green); font-size: 12px;">● Ready (use with Live Server)</span>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3>💾 Data</h3>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">Clear History</div>
+                <div class="setting-desc">Remove all saved chat and prompt history</div>
+              </div>
+              <button class="btn btn-danger" id="btn-clear-history">Clear All History</button>
+            </div>
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label">Export Settings</div>
+                <div class="setting-desc">Download settings as JSON file</div>
+              </div>
+              <button class="btn btn-secondary" id="btn-export-settings">Export</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ HISTORY PANEL ═══ -->
+      <div class="panel" id="panel-history">
+        <div class="panel-header">
+          <h2>📋 History</h2>
+          <div class="header-actions">
+            <button class="btn btn-ghost" id="btn-clear-all-history">Clear All</button>
+          </div>
+        </div>
+        <div class="history-panel">
+          <div class="history-list" id="history-list">
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <h4>No History Yet</h4>
+              <p>Your conversations and prompts will appear here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ═══════ STATUS BAR ═══════ -->
+  <footer class="statusbar">
+    <div class="status-left">
+      <span class="status-item">
+        <span class="status-dot" id="api-status-dot"></span>
+        <span id="api-status-text">API Ready</span>
+      </span>
+      <span class="status-item" id="active-panel-label">AI Chat</span>
+    </div>
+    <div class="status-right">
+      <span class="status-item" id="statusbar-model">Llama 3.3 70B</span>
+      <span class="status-item">Eclipse COPILOT v1.0</span>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="script.js"></script>
 </body>
 </html>
