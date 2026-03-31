@@ -3,98 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EclipseCopilot // Advanced Luau AI</title>
+    <title>EclipseCopilot // AI Code Tool for Roblox</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body class="dark-theme">
+<body>
     <div class="noise"></div>
     
-    <div id="app">
-        <aside class="main-sidebar">
-            <div class="nav-top">
-                <div class="app-logo">
-                    <div class="logo-inner"></div>
+    <section id="view-landing" class="view">
+        <nav class="land-nav">
+            <div class="land-logo">Eclipse<span>Copilot</span></div>
+            <div class="land-links">
+                <a href="#faq">FAQ</a>
+                <button class="btn-dash-trigger" onclick="switchView('app')">Dashboard</button>
+            </div>
+        </nav>
+
+        <header class="land-hero">
+            <div class="hero-text">
+                <h1 class="reveal">The first <br>AI Code Tool <br>for <span class="purple">Roblox</span></h1>
+                <p>Join thousands of creators using Eclipse to quickly turn dream ideas into prototypes.</p>
+                <div class="hero-btns">
+                    <button class="btn-primary-land" onclick="switchView('app')">Start Prototyping</button>
+                    <button class="btn-outline-land">Watch Demo <i class="fas fa-arrow-right"></i></button>
                 </div>
-                <nav class="icon-nav">
-                    <button class="nav-item active" onclick="showTab('editor')"><i class="fas fa-code"></i></button>
-                    <button class="nav-item" onclick="showTab('settings')"><i class="fas fa-sliders"></i></button>
+            </div>
+            <div class="hero-preview">
+                <div class="preview-card">
+                    <div class="preview-overlay">
+                        <p>Create an attack system using @Punch and spawn HP when hitting enemies.</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="social-proof">
+            <h2>Don't take our word for it</h2>
+            <div class="testimonial-grid">
+                <div class="t-card">"It significantly cut the time it took to code my game." - <strong>@xanderL_2009</strong></div>
+                <div class="t-card">"Eclipse allowed me to code scripts I couldn't before." - <strong>@smellybumb5</strong></div>
+            </div>
+        </section>
+    </section>
+
+    <section id="view-app" class="view hidden">
+        <div class="app-container">
+            <aside class="app-sidebar">
+                <div class="side-logo" onclick="switchView('landing')"><i class="fas fa-moon"></i></div>
+                <nav class="side-icons">
+                    <button class="nav-btn active" onclick="showTab('editor')"><i class="fas fa-terminal"></i></button>
+                    <button class="nav-btn" onclick="showTab('settings')"><i class="fas fa-cog"></i></button>
                 </nav>
-            </div>
-            <div class="nav-bottom">
-                <div class="status-dot tooltip">
-                    <span id="api-indicator"></span>
-                    <span class="tooltip-text">API Status</span>
-                </div>
-            </div>
-        </aside>
+                <div id="status-light" class="status-light"></div>
+            </aside>
 
-        <main class="content-area">
-            
-            <section id="tab-editor" class="tab-content active">
-                <header class="tab-header">
-                    <div class="header-left">
-                        <h1>Script Editor</h1>
-                        <span class="breadcrumb">EclipseCopilot / workspace / <strong>main.luau</strong></span>
-                    </div>
-                    <div class="header-right">
-                        <select id="model-select" class="modern-select">
-                            <option value="llama3-70b-8192">Llama3 70B (High Intelligence)</option>
-                            <option value="llama3-8b-8192">Llama3 8B (Fast)</option>
-                            <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
-                        </select>
-                        <button class="btn-secondary" onclick="copyResult()"><i class="fas fa-copy"></i> Copy</button>
-                    </div>
-                </header>
+            <main class="app-main">
+                <div id="tab-editor" class="tab-content active">
+                    <header class="app-header">
+                        <div class="header-info">
+                            <h2>Script Editor</h2>
+                            <span>workspace / <strong>main.luau</strong></span>
+                        </div>
+                        <div class="header-tools">
+                            <select id="model-select" class="modern-select">
+                                <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Versatile)</option>
+                                <option value="llama-3.1-8b-instant">Llama 3.1 8B (Instant)</option>
+                                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
+                                <option value="openai/gpt-oss-120b">GPT-OSS 120B</option>
+                            </select>
+                            <button class="btn-ghost" onclick="copyCode()"><i class="fas fa-copy"></i> Copy</button>
+                        </div>
+                    </header>
 
-                <div class="workspace-grid">
-                    <div class="editor-pane">
-                        <div class="pane-label">Prompt & Context</div>
-                        <div class="editor-wrapper">
-                            <div class="line-numbers" id="ln-input">1</div>
-                            <textarea id="ai-input" spellcheck="false" placeholder="Descreva o que você quer criar..."></textarea>
+                    <div class="editor-grid">
+                        <div class="pane">
+                            <div class="pane-tag">Prompt</div>
+                            <textarea id="prompt-input" placeholder="e.g. Add double-jump with particles..."></textarea>
+                        </div>
+                        <div class="pane output-pane">
+                            <div class="pane-tag">Luau Code</div>
+                            <textarea id="code-output" readonly placeholder="Pick an action to begin..."></textarea>
+                            <div id="loader" class="loader hidden"><div class="scan-line"></div></div>
                         </div>
                     </div>
-                    <div class="editor-pane result-pane">
-                        <div class="pane-label">Optimized Luau Output</div>
-                        <div class="editor-wrapper">
-                            <div class="line-numbers" id="ln-output">1</div>
-                            <textarea id="ai-output" readonly placeholder="Aguardando entrada..."></textarea>
-                            <div id="ai-loader" class="ai-loader hidden">
-                                <div class="glow-bar"></div>
-                            </div>
+
+                    <footer class="app-footer">
+                        <div class="quick-btns">
+                            <button onclick="runAction('Fix Script')"><i class="fas fa-magic"></i> Fix Script</button>
+                            <button onclick="runAction('Optimize')"><i class="fas fa-clock"></i> Optimize</button>
+                            <button onclick="runAction('Explain')"><i class="fas fa-info-circle"></i> Explain</button>
+                        </div>
+                        <button class="btn-generate" onclick="generate()">Generate <kbd>Ctrl+K</kbd></button>
+                    </footer>
+                </div>
+
+                <div id="tab-settings" class="tab-content">
+                    <div class="settings-box">
+                        <h3>Configuration</h3>
+                        <div class="input-group">
+                            <label>Groq API Key</label>
+                            <input type="password" id="api-key-input" placeholder="gsk_..." onchange="saveAPIKey()">
+                            <p class="hint">Saved locally in your browser. Never shared.</p>
                         </div>
                     </div>
                 </div>
-
-                <footer class="action-footer">
-                    <div class="preset-group">
-                        <button onclick="quickAction('Corrija erros de sintaxe e lógica neste código')">Fix Bugs</button>
-                        <button onclick="quickAction('Otimize este código para performance máxima no Roblox')">Optimize</button>
-                        <button onclick="quickAction('Comente cada linha deste código detalhadamente')">Explain</button>
-                    </div>
-                    <button class="btn-generate" onclick="generateResponse()">
-                        <span>Generate</span>
-                        <kbd>CMD + K</kbd>
-                    </button>
-                </footer>
-            </section>
-
-            <section id="tab-settings" class="tab-content">
-                <header class="tab-header">
-                    <h1>Settings</h1>
-                </header>
-                <div class="settings-form">
-                    <div class="setting-item">
-                        <label>Groq API Key</label>
-                        <p>Sua chave é salva apenas no seu navegador.</p>
-                        <input type="password" id="groq-key-input" placeholder="gsk_..." onchange="saveKey()">
-                    </div>
-                </div>
-            </section>
-
-        </main>
-    </div>
+            </main>
+        </div>
+    </section>
 
     <script src="script.js"></script>
 </body>
