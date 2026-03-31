@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roblox AI Script Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="scanline"></div>
+  <div class="noise"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="2" width="10" height="10" rx="2" fill="var(--accent)"/>
+            <rect x="16" y="2" width="10" height="10" rx="2" fill="var(--accent2)"/>
+            <rect x="2" y="16" width="10" height="10" rx="2" fill="var(--accent2)"/>
+            <rect x="16" y="16" width="10" height="10" rx="2" fill="var(--accent)"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Roblox AI <span class="accent-text">Script Assistant</span></h1>
+          <p class="subtitle">Powered by Groq · Luau Specialist</p>
+        </div>
+      </div>
+      <div class="header-meta">
+        <div class="status-dot"></div>
+        <span class="status-label">API READY</span>
+        <div class="token-counter">
+          <span class="token-label">TOKENS</span>
+          <span id="tokenCount">0</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel-grid">
+
+      <!-- LEFT PANEL -->
+      <section class="panel panel-input">
+        <div class="panel-header">
+          <span class="panel-tag">INPUT</span>
+          <span class="panel-title">Prompt & Code</span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">// PROMPT</label>
+          <textarea id="promptInput" class="textarea prompt-area" placeholder="Describe what you want...
+e.g.: Create an inventory system for Roblox"></textarea>
+        </div>
+
+        <div class="field-group">
+          <div class="code-label-row">
+            <label class="field-label">// CODE EDITOR</label>
+            <div class="lang-badge">LUAU</div>
+          </div>
+          <div class="code-wrap">
+            <div class="line-nums" id="lineNums">1</div>
+            <textarea id="codeInput" class="textarea code-area" placeholder="-- Paste your Luau script here...
+-- Leave empty for code generation
+
+local function example()
+    print('Hello, Roblox!')
+end" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+          </div>
+        </div>
+
+        <div class="action-grid">
+          <button class="btn btn-primary" data-action="generate">
+            <svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 1L10 6H15L11 9.5L12.5 15L8 11.5L3.5 15L5 9.5L1 6H6L8 1Z" fill="currentColor"/></svg>
+            Generate Script
+          </button>
+          <button class="btn btn-secondary" data-action="fix">
+            <svg width="16" height="16" viewBox="0 0 16 16"><path d="M13 2L14 6L10 5L13 2ZM2 14L1 10L5 11L2 14ZM3.5 3.5L12.5 12.5M5 2H2V5M14 11V14H11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+            Fix Script
+          </button>
+          <button class="btn btn-secondary" data-action="optimize">
+            <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 4V8L11 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+            Optimize Script
+          </button>
+          <button class="btn btn-secondary" data-action="explain">
+            <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 7V12M8 5V5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Explain Code
+          </button>
+        </div>
+
+        <div class="api-key-row">
+          <label class="field-label">// GROQ API KEY</label>
+          <div class="api-input-wrap">
+            <input type="password" id="apiKey" class="api-input" placeholder="gsk_••••••••••••••••••••••••••••••••••" />
+            <button class="btn-toggle-key" id="toggleKey" title="Show/Hide">
+              <svg width="14" height="14" viewBox="0 0 16 16"><ellipse cx="8" cy="8" rx="6" ry="4" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT PANEL -->
+      <section class="panel panel-output">
+        <div class="panel-header">
+          <span class="panel-tag">OUTPUT</span>
+          <span class="panel-title">AI Response</span>
+          <div class="output-actions">
+            <button class="btn-icon" id="copyBtn" title="Copy code">
+              <svg width="15" height="15" viewBox="0 0 16 16"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+              <span>Copy</span>
+            </button>
+            <button class="btn-icon" id="clearBtn" title="Clear output">
+              <svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 3L13 13M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <span>Clear</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="output-wrap" id="outputWrap">
+          <div class="idle-state" id="idleState">
+            <div class="idle-icon">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <rect x="4" y="4" width="16" height="16" rx="3" fill="var(--accent)" opacity="0.3"/>
+                <rect x="28" y="4" width="16" height="16" rx="3" fill="var(--accent2)" opacity="0.3"/>
+                <rect x="4" y="28" width="16" height="16" rx="3" fill="var(--accent2)" opacity="0.3"/>
+                <rect x="28" y="28" width="16" height="16" rx="3" fill="var(--accent)" opacity="0.3"/>
+              </svg>
+            </div>
+            <p class="idle-text">Ready to assist.<br/>Select an action to begin.</p>
+            <div class="idle-hints">
+              <span>Plugin endpoint: <code>localhost:5500/ai</code></span>
+            </div>
+          </div>
+
+          <div class="loading-state hidden" id="loadingState">
+            <div class="loader-bars">
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+            </div>
+            <p class="loading-text" id="loadingText">Processing...</p>
+          </div>
+
+          <div class="result-state hidden" id="resultState">
+            <pre id="outputCode" class="output-code"></pre>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- PLUGIN SECTION -->
+    <section class="plugin-section">
+      <div class="panel-header">
+        <span class="panel-tag">ROBLOX STUDIO</span>
+        <span class="panel-title">Plugin Integration</span>
+        <button class="btn-icon" id="copyPlugin" title="Copy plugin code">
+          <svg width="15" height="15" viewBox="0 0 16 16"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span>Copy Plugin</span>
+        </button>
+      </div>
+      <div class="plugin-grid">
+        <div class="plugin-info">
+          <h3>How it works</h3>
+          <ol>
+            <li>Open this site with <strong>Live Server</strong> on port <code>5500</code></li>
+            <li>Enable <strong>HTTP Requests</strong> in Roblox Studio settings</li>
+            <li>Paste the plugin code into a <strong>Script</strong> in Studio</li>
+            <li>The plugin POSTs to <code>/ai</code> and gets the result back</li>
+          </ol>
+          <div class="warn-box">
+            ⚠ HTTP enabled on <code>localhost</code> only — no security risk.
+          </div>
+        </div>
+        <div class="plugin-code-wrap">
+          <pre class="plugin-code" id="pluginCode">-- Roblox Studio Plugin
+-- Enable: Studio Settings > Security > Allow HTTP Requests
+
+local HttpService = game:GetService("HttpService")
+local Selection = game:GetService("Selection")
+
+local ENDPOINT = "http://localhost:5500/ai"
+
+local toolbar = plugin:CreateToolbar("AI Assistant")
+local fixBtn  = toolbar:CreateButton("Fix Script", "Fix selected script with AI", "rbxassetid://6035067966")
+local genBtn  = toolbar:CreateButton("Generate",   "Generate a script from prompt", "rbxassetid://6035067966")
+
+local function getSelectedScript()
+    local sel = Selection:Get()
+    if #sel == 0 then return nil end
+    local obj = sel[1]
+    if obj:IsA("LuaSourceContainer") then
+        return obj
+    end
+    return nil
+end
+
+local function callAI(prompt, code)
+    local ok, resp = pcall(function()
+        return HttpService:PostAsync(
+            ENDPOINT,
+            HttpService:JSONEncode({ prompt = prompt, code = code or "" }),
+            Enum.HttpContentType.ApplicationJson
+        )
+    end)
+    if not ok then
+        warn("[AI Assistant] Request failed: " .. tostring(resp))
+        return nil
+    end
+    local data = HttpService:JSONDecode(resp)
+    return data.result
+end
+
+fixBtn.Click:Connect(function()
+    local scr = getSelectedScript()
+    if not scr then
+        warn("[AI Assistant] Select a Script first.")
+        return
+    end
+    local result = callAI("Fix this Luau script. Return only corrected code.", scr.Source)
+    if result then
+        scr.Source = result
+        print("[AI Assistant] Script fixed!")
+    end
+end)
+
+genBtn.Click:Connect(function()
+    local prompt = "Create a basic Roblox game system"
+    -- Replace with your own prompt input UI if desired
+    local result = callAI(prompt, "")
+    if result then
+        local newScript = Instance.new("Script")
+        newScript.Source = result
+        newScript.Parent = game.ServerScriptService
+        newScript.Name  = "AI_Generated"
+        Selection:Set({newScript})
+        print("[AI Assistant] Script generated!")
+    end
+end)</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Roblox AI Script Assistant · Groq <code>llama3-70b-8192</code></span>
+    <span>Made for Roblox Studio development</span>
+  </footer>
+
+  <div class="toast hidden" id="toast">Copied to clipboard!</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
