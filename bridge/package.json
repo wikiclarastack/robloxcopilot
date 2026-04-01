@@ -1,0 +1,14 @@
+{
+  "name": "eclipsecopilot-bridge",
+  "version": "1.0.0",
+  "description": "EclipseCopilot — Servidor ponte entre o site e o plugin Roblox Studio",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "EclipseCopilot",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
