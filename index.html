@@ -1,588 +1,884 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Eclipse COPILOT — Roblox AI Dev Platform</title>
-  <meta name="description" content="AI-powered Roblox Luau development platform with intelligent code editing, script analysis, exploit scanning, and multi-model Groq integration." />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EclipseCopilot — Roblox AI Script Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #070a10;
+  --s1:       #0d1322;
+  --s2:       #111b30;
+  --s3:       #18243e;
+  --border:   #1d2d4a;
+  --accent:   #00d4ff;
+  --purple:   #7c3aed;
+  --green:    #10b981;
+  --red:      #ef4444;
+  --yellow:   #f59e0b;
+  --text:     #e2eaf8;
+  --muted:    #5a7090;
+  --glow:     rgba(0,212,255,0.12);
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ── Cursor ──────────────────────────────── */
+#cur,#ring{position:fixed;pointer-events:none;z-index:9999;border-radius:50%;}
+#cur{width:10px;height:10px;background:var(--accent);mix-blend-mode:screen;transition:transform .08s;}
+#ring{width:32px;height:32px;border:1.5px solid rgba(0,212,255,.35);transition:transform .14s;}
+
+/* ── Grid bg ─────────────────────────────── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px);
+  background-size:44px 44px;
+  pointer-events:none;z-index:0;
+}
+
+/* ── NAV ─────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 48px;
+  background:rgba(7,10,16,.88);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:18px;
+  display:flex;align-items:center;gap:10px;letter-spacing:-.3px;
+}
+.logo-dot{
+  width:8px;height:8px;background:var(--accent);border-radius:50%;
+  box-shadow:0 0 10px var(--accent);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+
+nav ul{display:flex;gap:32px;list-style:none;}
+nav a{color:var(--muted);text-decoration:none;font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:color .2s;}
+nav a:hover{color:var(--accent);}
+.nav-btn{background:var(--accent)!important;color:var(--bg)!important;padding:7px 18px;border-radius:4px;font-weight:600!important;}
+.nav-btn:hover{box-shadow:0 0 20px rgba(0,212,255,.4)!important;}
+
+/* ── LAYOUT ──────────────────────────────── */
+.page{
+  position:relative;z-index:1;
+  max-width:1160px;margin:0 auto;padding:100px 24px 60px;
+}
+
+/* ── HERO ────────────────────────────────── */
+.hero{text-align:center;padding:60px 0 48px;}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.18);
+  color:var(--accent);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  padding:5px 14px;border-radius:100px;margin-bottom:28px;
+  animation:fadeUp .5s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+h1{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:clamp(44px,7vw,84px);line-height:.95;letter-spacing:-2.5px;
+  margin-bottom:20px;animation:fadeUp .5s .08s ease both;
+}
+.h1-plain{color:var(--text);}
+.h1-grad{
+  background:linear-gradient(90deg,var(--accent),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{
+  max-width:480px;margin:0 auto 36px;color:var(--muted);font-size:13px;
+  line-height:1.7;animation:fadeUp .5s .16s ease both;
+}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;animation:fadeUp .5s .24s ease both;}
+
+/* ── BUTTONS ─────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:13px;
+  padding:12px 26px;border-radius:6px;border:none;
+  cursor:none;text-decoration:none;transition:all .18s;
+}
+.btn-primary{background:var(--accent);color:var(--bg);}
+.btn-primary:hover{box-shadow:0 0 30px rgba(0,212,255,.4);transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-outline:hover{border-color:var(--accent);transform:translateY(-1px);}
+.btn-purple{background:var(--purple);color:#fff;}
+.btn-purple:hover{box-shadow:0 0 24px rgba(124,58,237,.45);transform:translateY(-1px);}
+.btn-sm{padding:7px 16px;font-size:11px;border-radius:5px;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{box-shadow:0 0 20px rgba(16,185,129,.4);}
+
+/* ── CONNECTION BANNER ───────────────────── */
+.conn-banner{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:10px;padding:14px 20px;margin-bottom:28px;
+  transition:border-color .3s;
+}
+.conn-banner.online{border-color:var(--green);}
+.conn-banner.offline{border-color:var(--red);}
+.conn-left{display:flex;align-items:center;gap:14px;}
+.conn-dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s,box-shadow .3s;}
+.conn-dot.online{background:var(--green);box-shadow:0 0 10px var(--green);}
+.conn-dot.offline{background:var(--red);}
+.conn-dot.checking{background:var(--yellow);animation:pulse 1s infinite;}
+.conn-text{display:flex;flex-direction:column;gap:2px;}
+.conn-status{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;}
+.conn-sub{font-size:10px;color:var(--muted);}
+.conn-url{
+  background:var(--s3);border:1px solid var(--border);color:var(--accent);
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:6px 12px;border-radius:5px;outline:none;width:220px;
+  transition:border-color .2s;cursor:none;
+}
+.conn-url:focus{border-color:var(--accent);}
+
+/* ── MAIN GRID ───────────────────────────── */
+.main-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:2px;background:var(--border);border-radius:12px;
+  overflow:hidden;box-shadow:0 0 60px var(--glow);
+}
+.panel{background:var(--s1);padding:26px;}
+.panel-l{border-radius:12px 0 0 12px;}
+.panel-r{border-radius:0 12px 12px 0;}
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:18px;margin-bottom:20px;
+  border-bottom:1px solid var(--border);
+}
+.panel-title{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:11px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+}
+.wdots{display:flex;gap:5px;}
+.wdots span{width:8px;height:8px;border-radius:50%;}
+.wdots span:nth-child(1){background:#ef4444;}
+.wdots span:nth-child(2){background:#f59e0b;}
+.wdots span:nth-child(3){background:#10b981;}
+
+/* ── FORM ────────────────────────────────── */
+.fg{margin-bottom:16px;}
+label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+select,input[type=password],input[type=text]{
+  width:100%;background:var(--s2);border:1px solid var(--border);
+  color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;
+  padding:9px 12px;border-radius:6px;outline:none;
+  transition:border-color .2s,box-shadow .2s;cursor:none;appearance:none;
+}
+select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.07);}
+select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%235a7090' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;
+}
+textarea{
+  width:100%;background:var(--s2);border:1px solid var(--border);
+  color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;
+  padding:12px;border-radius:6px;outline:none;resize:vertical;
+  min-height:130px;line-height:1.6;transition:border-color .2s,box-shadow .2s;cursor:none;
+}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.07);}
+
+.sub-select{display:none;}
+.sub-select.show{display:block;}
+
+/* ── GENERATE BTN ────────────────────────── */
+.gen-btn{
+  width:100%;background:linear-gradient(135deg,var(--accent),var(--purple));
+  color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;
+  padding:13px;border:none;border-radius:8px;cursor:none;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-top:20px;transition:opacity .2s,transform .15s,box-shadow .2s;
+  position:relative;overflow:hidden;
+}
+.gen-btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(124,58,237,.4);}
+.gen-btn:disabled{opacity:.45;pointer-events:none;}
+.gen-btn .spinner{
+  width:18px;height:18px;border:2px solid rgba(255,255,255,.25);
+  border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;display:none;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── OUTPUT PANEL ────────────────────────── */
+.out-code{
+  background:#050810;border:1px solid var(--border);border-radius:8px;
+  padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;
+  line-height:1.65;color:#a8cfe4;overflow-y:auto;
+  min-height:280px;max-height:420px;
+  white-space:pre-wrap;word-break:break-all;position:relative;
+}
+.out-placeholder{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:12px;color:var(--muted);text-align:center;padding:40px;
+}
+.out-placeholder svg{opacity:.15;}
+.copy-btn{
+  position:absolute;top:10px;right:10px;
+  background:var(--s3);border:1px solid var(--border);
+  color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;
+  padding:4px 10px;border-radius:4px;cursor:none;transition:all .2s;
+  display:none;
+}
+.copy-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+.send-to-roblox{
+  width:100%;margin-top:12px;
+  background:var(--green);color:#fff;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:13px;
+  padding:11px;border:none;border-radius:7px;cursor:none;
+  display:none;align-items:center;justify-content:center;gap:8px;
+  transition:all .2s;
+}
+.send-to-roblox:hover{box-shadow:0 0 24px rgba(16,185,129,.45);transform:translateY(-1px);}
+.send-to-roblox.sending{opacity:.6;pointer-events:none;}
+
+.out-meta{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:10px;font-size:10px;color:var(--muted);
+}
+.stat-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:6px;transition:all .3s;}
+.stat-dot.ok{background:var(--green);box-shadow:0 0 7px var(--green);}
+.stat-dot.err{background:var(--red);}
+
+/* ── QUICK PROMPTS ───────────────────────── */
+.qp-wrap{margin-top:18px;}
+.qp-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+.qp-chip{
+  background:var(--s2);border:1px solid var(--border);color:var(--muted);
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  padding:5px 12px;border-radius:100px;cursor:none;
+  transition:all .18s;
+}
+.qp-chip:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ── LOGS PANEL ──────────────────────────── */
+.logs-section{margin-top:28px;}
+.logs-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+}
+.logs-title{font-family:'Syne',sans-serif;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.log-box{
+  background:var(--s1);border:1px solid var(--border);border-radius:8px;
+  padding:12px;height:130px;overflow-y:auto;
+  font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;
+}
+.log-line{display:flex;gap:10px;align-items:flex-start;}
+.log-time{color:var(--muted);flex-shrink:0;font-size:10px;padding-top:1px;}
+.log-icon{flex-shrink:0;font-size:11px;}
+.log-msg{color:var(--text);}
+.log-msg.success{color:var(--green);}
+.log-msg.error{color:var(--red);}
+.log-msg.warning{color:var(--yellow);}
+.log-msg.info{color:var(--muted);}
+.log-msg.apply{color:var(--accent);}
+
+/* ── MARQUEE ─────────────────────────────── */
+.marquee{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:12px 0;margin:60px 0 0;}
+.marquee-track{display:flex;gap:56px;animation:marquee 22s linear infinite;white-space:nowrap;width:max-content;}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.m-item{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:10px;letter-spacing:.14em;text-transform:uppercase;}
+.m-pip{width:4px;height:4px;border-radius:50%;background:var(--accent);}
+
+/* ── FOOTER ──────────────────────────────── */
+footer{
+  position:relative;z-index:1;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:32px 48px;flex-wrap:wrap;gap:20px;
+}
+.footer-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;display:flex;align-items:center;gap:8px;}
+.footer-cr{font-size:11px;color:var(--muted);text-align:center;}
+.footer-cr a{color:var(--accent);text-decoration:none;}
+.footer-links{display:flex;gap:20px;list-style:none;}
+.footer-links a{color:var(--muted);text-decoration:none;font-size:11px;transition:color .2s;}
+.footer-links a:hover{color:var(--accent);}
+
+/* ── Syntax colors ───────────────────────── */
+.kw{color:#c792ea;}.fn{color:#82aaff;}.str{color:#c3e88d;}.cm{color:#4a6274;font-style:italic;}.num{color:#f78c6c;}
+
+/* ── Responsive ──────────────────────────── */
+@media(max-width:760px){
+  nav{padding:14px 18px;}
+  nav ul{display:none;}
+  .main-grid{grid-template-columns:1fr;}
+  footer{flex-direction:column;text-align:center;}
+  .panel-l,.panel-r{border-radius:0;}
+}
+</style>
 </head>
 <body>
 
-<div id="app">
+<div id="cur"></div>
+<div id="ring"></div>
 
-  <!-- ═══════ TITLE BAR ═══════ -->
-  <header class="titlebar">
-    <div class="titlebar-logo">
-      <div class="logo-icon">E</div>
-      <span class="logo-text">ECLIPSE COPILOT</span>
+<!-- NAV -->
+<nav>
+  <div class="logo"><div class="logo-dot"></div>EclipseCopilot</div>
+  <ul>
+    <li><a href="#generator">Gerador</a></li>
+    <li><a href="#how">Como usar</a></li>
+    <li><a href="#generator" class="nav-btn">Gerar Script →</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">⚡ Conectado ao Roblox Studio via Bridge</div>
+    <h1>
+      <span class="h1-plain">Scripts Roblox</span><br>
+      <span class="h1-grad">direto no Studio.</span>
+    </h1>
+    <p class="hero-sub">
+      Descreva o script, escolha o provider de IA e envie.<br>
+      EclipseCopilot aplica automaticamente no Roblox Studio.
+    </p>
+    <div class="hero-btns">
+      <a href="#generator" class="btn btn-primary">⚡ Gerar Script</a>
+      <a href="#how" class="btn btn-outline">Como funciona →</a>
     </div>
-    <div class="titlebar-center">Roblox Luau AI Development Platform</div>
-    <div class="titlebar-model-badge">
-      <span class="pulse-dot"></span>
-      <span id="active-model-name">Llama 3.3 70B</span>
-    </div>
-  </header>
-
-  <!-- ═══════ MAIN LAYOUT ═══════ -->
-  <div class="main-layout">
-
-    <!-- ─── Sidebar ─── -->
-    <aside class="sidebar" id="sidebar">
-      <nav class="sidebar-nav">
-        <div class="sidebar-section-label">Main</div>
-        <button class="nav-item active" data-panel="chat" id="nav-chat">
-          <span class="nav-icon">💬</span>
-          <span class="nav-label">AI Chat</span>
-        </button>
-        <button class="nav-item" data-panel="editor" id="nav-editor">
-          <span class="nav-icon">📝</span>
-          <span class="nav-label">Code Editor</span>
-        </button>
-
-        <div class="sidebar-section-label">Analysis</div>
-        <button class="nav-item" data-panel="analyzer" id="nav-analyzer">
-          <span class="nav-icon">🔍</span>
-          <span class="nav-label">Script Analyzer</span>
-        </button>
-        <button class="nav-item" data-panel="exploit" id="nav-exploit">
-          <span class="nav-icon">🛡️</span>
-          <span class="nav-label">Exploit Scanner</span>
-        </button>
-        <button class="nav-item" data-panel="project" id="nav-project">
-          <span class="nav-icon">📂</span>
-          <span class="nav-label">Project Analyzer</span>
-        </button>
-
-        <div class="sidebar-section-label">Tools</div>
-        <button class="nav-item" data-panel="generator" id="nav-generator">
-          <span class="nav-icon">⚡</span>
-          <span class="nav-label">System Generator</span>
-        </button>
-        <button class="nav-item" data-panel="refactor" id="nav-refactor">
-          <span class="nav-icon">🔧</span>
-          <span class="nav-label">Script Refactor</span>
-        </button>
-        <button class="nav-item" data-panel="debug" id="nav-debug">
-          <span class="nav-icon">🐛</span>
-          <span class="nav-label">Auto Debug</span>
-        </button>
-
-        <div class="sidebar-section-label">System</div>
-        <button class="nav-item" data-panel="settings" id="nav-settings">
-          <span class="nav-icon">⚙️</span>
-          <span class="nav-label">Settings</span>
-        </button>
-        <button class="nav-item" data-panel="history" id="nav-history">
-          <span class="nav-icon">📋</span>
-          <span class="nav-label">History</span>
-          <span class="nav-badge" id="history-count">0</span>
-        </button>
-      </nav>
-      <div class="sidebar-toggle">
-        <button id="toggle-sidebar" title="Toggle Sidebar">◀</button>
-      </div>
-    </aside>
-
-    <!-- ─── Content Area ─── -->
-    <main class="content-area">
-
-      <!-- ═══ AI CHAT PANEL ═══ -->
-      <div class="panel active" id="panel-chat">
-        <div class="panel-header">
-          <h2>💬 AI Chat</h2>
-          <div class="header-actions">
-            <div class="model-selector">
-              <select id="chat-model-select">
-                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
-                <option value="meta-llama/llama-3.1-8b-instant">Llama 3.1 8B</option>
-                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
-                <option value="meta-llama/llama-guard-4-12b">GPT-OSS 120B</option>
-              </select>
-            </div>
-            <button class="btn btn-ghost btn-icon" id="clear-chat" title="Clear Chat">🗑️</button>
-          </div>
-        </div>
-
-        <div class="chat-messages" id="chat-messages">
-          <div class="chat-welcome" id="chat-welcome">
-            <div class="welcome-icon">🚀</div>
-            <h3>Eclipse COPILOT</h3>
-            <p>Your AI-powered Roblox Luau development assistant. Ask me to generate scripts, analyze code, debug issues, or create complete game systems.</p>
-            <div class="chat-suggestions">
-              <button class="suggestion-chip" data-prompt="Create a complete pet system with hatching, leveling, and inventory">
-                <span class="chip-icon">🐾</span> Pet System
-              </button>
-              <button class="suggestion-chip" data-prompt="Create an inventory system with UI, datastore saving, and item management">
-                <span class="chip-icon">🎒</span> Inventory System
-              </button>
-              <button class="suggestion-chip" data-prompt="Create a combat system with abilities, cooldowns, and damage calculation">
-                <span class="chip-icon">⚔️</span> Combat System
-              </button>
-              <button class="suggestion-chip" data-prompt="Create a leaderboard system with DataStore, UI ranking, and real-time updates">
-                <span class="chip-icon">🏆</span> Leaderboard
-              </button>
-              <button class="suggestion-chip" data-prompt="Explain how RemoteEvents and RemoteFunctions work in Roblox with examples">
-                <span class="chip-icon">📚</span> Explain Remotes
-              </button>
-              <button class="suggestion-chip" data-prompt="Create a shop system with in-game currency, product catalog, and purchase validation">
-                <span class="chip-icon">🛒</span> Shop System
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="chat-input-area">
-          <div class="chat-input-wrapper">
-            <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask Eclipse to generate, analyze, or explain Luau code..."></textarea>
-            <div class="chat-input-actions">
-              <button class="btn-icon" id="attach-code-btn" title="Attach editor code">📎</button>
-              <button class="send-btn" id="send-btn" title="Send message">▶</button>
-            </div>
-          </div>
-          <div class="chat-meta">
-            <span class="token-counter" id="token-counter">0 tokens (est.)</span>
-            <span id="chat-status"></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ CODE EDITOR PANEL ═══ -->
-      <div class="panel" id="panel-editor">
-        <div class="panel-header">
-          <h2>📝 Code Editor</h2>
-          <div class="header-actions">
-            <span class="editor-toolbar file-name" id="editor-filename">untitled.luau</span>
-            <button class="btn btn-secondary" id="btn-format">✨ Format</button>
-            <button class="btn btn-secondary" id="btn-analyze-editor">🔍 Analyze</button>
-            <button class="btn btn-secondary" id="btn-debug-editor">🐛 Debug</button>
-            <button class="btn btn-secondary" id="btn-copy-editor">📋 Copy</button>
-            <button class="btn btn-secondary" id="btn-download-editor">⬇️ Download</button>
-          </div>
-        </div>
-        <div class="editor-wrapper">
-          <div class="editor-container">
-            <div class="line-numbers" id="line-numbers"></div>
-            <textarea class="code-editor" id="code-editor" spellcheck="false" placeholder="-- Start coding in Luau...&#10;-- Type '-- ai: your request' for AI autocomplete&#10;&#10;local Players = game:GetService('Players')&#10;"></textarea>
-            <div class="editor-minimap" id="editor-minimap">
-              <div class="minimap-content" id="minimap-content"></div>
-              <div class="minimap-viewport" id="minimap-viewport"></div>
-            </div>
-          </div>
-          <div class="editor-status">
-            <span class="status-item" id="editor-cursor-pos">Ln 1, Col 1</span>
-            <span class="status-item">Luau</span>
-            <span class="status-item">UTF-8</span>
-            <span class="status-item right" id="editor-lines-count">0 lines</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ SCRIPT ANALYZER PANEL ═══ -->
-      <div class="panel" id="panel-analyzer">
-        <div class="panel-header">
-          <h2>🔍 Script Analyzer</h2>
-          <div class="header-actions">
-            <div class="model-selector">
-              <select id="analyzer-model-select">
-                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
-                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="analyzer-panel">
-          <div class="analyzer-input-area">
-            <label>Paste your Luau script below for analysis:</label>
-            <textarea class="analyzer-textarea" id="analyzer-code" placeholder="-- Paste your script here..."></textarea>
-            <div class="analyzer-actions">
-              <button class="btn btn-primary" id="btn-run-analyzer">🔍 Run Analysis</button>
-              <button class="btn btn-secondary" id="btn-paste-from-editor-analyzer">📋 Paste from Editor</button>
-              <button class="btn btn-ghost" id="btn-clear-analyzer">Clear</button>
-            </div>
-          </div>
-          <div class="analyzer-results" id="analyzer-results">
-            <div class="empty-state">
-              <div class="empty-icon">🔍</div>
-              <h4>No Analysis Yet</h4>
-              <p>Paste a script and click "Run Analysis" to detect errors, bad practices, memory leaks, and performance issues.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ EXPLOIT SCANNER PANEL ═══ -->
-      <div class="panel" id="panel-exploit">
-        <div class="panel-header">
-          <h2>🛡️ Exploit Scanner</h2>
-          <div class="header-actions">
-            <div class="model-selector">
-              <select id="exploit-model-select">
-                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
-                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="analyzer-panel">
-          <div class="analyzer-input-area">
-            <label>Paste your script to scan for security vulnerabilities:</label>
-            <textarea class="analyzer-textarea" id="exploit-code" placeholder="-- Paste your script here to scan for exploits..."></textarea>
-            <div class="analyzer-actions">
-              <button class="btn btn-primary" id="btn-run-exploit">🛡️ Scan for Exploits</button>
-              <button class="btn btn-secondary" id="btn-paste-from-editor-exploit">📋 Paste from Editor</button>
-              <button class="btn btn-ghost" id="btn-clear-exploit">Clear</button>
-            </div>
-          </div>
-          <div class="analyzer-results" id="exploit-results">
-            <div class="empty-state">
-              <div class="empty-icon">🛡️</div>
-              <h4>No Scan Results</h4>
-              <p>Paste a script and click "Scan for Exploits" to find insecure RemoteEvents, trust-client vulnerabilities, and exploit risks.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ PROJECT ANALYZER PANEL ═══ -->
-      <div class="panel" id="panel-project">
-        <div class="panel-header">
-          <h2>📂 Project Analyzer</h2>
-          <div class="header-actions">
-            <button class="btn btn-secondary" id="btn-add-project-script">+ Add Script</button>
-          </div>
-        </div>
-        <div class="analyzer-panel">
-          <div class="analyzer-input-area" style="max-height: 50%; overflow-y: auto;">
-            <label>Add multiple scripts for a full project analysis:</label>
-            <div class="project-scripts-list" id="project-scripts-list">
-              <div class="project-script-entry" data-index="0">
-                <div class="project-script-header">
-                  <input type="text" placeholder="Script name (e.g., ServerScriptService/Main)" />
-                  <button class="btn-icon" onclick="removeProjectScript(0)" title="Remove">✕</button>
-                </div>
-                <textarea placeholder="-- Paste script code here..."></textarea>
-              </div>
-            </div>
-            <div class="analyzer-actions">
-              <button class="btn btn-primary" id="btn-run-project">📂 Analyze Project</button>
-              <button class="btn btn-ghost" id="btn-clear-project">Clear All</button>
-            </div>
-          </div>
-          <div class="analyzer-results" id="project-results">
-            <div class="empty-state">
-              <div class="empty-icon">📂</div>
-              <h4>No Project Analysis</h4>
-              <p>Add multiple scripts and click "Analyze Project" to review architecture, find redundancies, and get improvement suggestions.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ SYSTEM GENERATOR PANEL ═══ -->
-      <div class="panel" id="panel-generator">
-        <div class="panel-header">
-          <h2>⚡ Game System Generator</h2>
-          <div class="header-actions">
-            <div class="model-selector">
-              <select id="generator-model-select">
-                <option value="meta-llama/llama-guard-4-12b">GPT-OSS 120B</option>
-                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
-                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="analyzer-panel">
-          <div class="analyzer-input-area">
-            <label>Choose a preset or describe the system you want to generate:</label>
-            <div class="system-presets" id="system-presets">
-              <button class="system-preset" data-system="pet">
-                <div class="preset-icon">🐾</div>
-                <div class="preset-name">Pet System</div>
-                <div class="preset-desc">Hatching, leveling, inventory, equipping</div>
-              </button>
-              <button class="system-preset" data-system="inventory">
-                <div class="preset-icon">🎒</div>
-                <div class="preset-name">Inventory System</div>
-                <div class="preset-desc">Items, stacking, UI, DataStore saving</div>
-              </button>
-              <button class="system-preset" data-system="combat">
-                <div class="preset-icon">⚔️</div>
-                <div class="preset-name">Combat System</div>
-                <div class="preset-desc">Abilities, cooldowns, damage, health</div>
-              </button>
-              <button class="system-preset" data-system="skills">
-                <div class="preset-icon">✨</div>
-                <div class="preset-name">Skills System</div>
-                <div class="preset-desc">Skill tree, XP, upgrades, effects</div>
-              </button>
-              <button class="system-preset" data-system="leaderboard">
-                <div class="preset-icon">🏆</div>
-                <div class="preset-name">Leaderboard</div>
-                <div class="preset-desc">Rankings, DataStore, real-time UI</div>
-              </button>
-              <button class="system-preset" data-system="shop">
-                <div class="preset-icon">🛒</div>
-                <div class="preset-name">Shop System</div>
-                <div class="preset-desc">Currency, catalog, purchase validation</div>
-              </button>
-              <button class="system-preset" data-system="trading">
-                <div class="preset-icon">🤝</div>
-                <div class="preset-name">Trading System</div>
-                <div class="preset-desc">Player-to-player trades, confirmation</div>
-              </button>
-              <button class="system-preset" data-system="quest">
-                <div class="preset-icon">📜</div>
-                <div class="preset-name">Quest System</div>
-                <div class="preset-desc">Tasks, rewards, progress tracking</div>
-              </button>
-            </div>
-            <textarea class="analyzer-textarea" id="generator-custom" placeholder="Or describe a custom system... e.g., 'Create a gacha system with rarity tiers, pity system, and animated pulls'" style="min-height: 100px;"></textarea>
-            <div class="analyzer-actions">
-              <button class="btn btn-primary" id="btn-generate-system">⚡ Generate System</button>
-              <button class="btn btn-ghost" id="btn-clear-generator">Clear</button>
-            </div>
-          </div>
-          <div class="analyzer-results" id="generator-results">
-            <div class="empty-state">
-              <div class="empty-icon">⚡</div>
-              <h4>No System Generated</h4>
-              <p>Select a preset or describe a system to generate complete ModuleScripts, ServerScripts, LocalScripts, and RemoteEvents.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ SCRIPT REFACTOR PANEL ═══ -->
-      <div class="panel" id="panel-refactor">
-        <div class="panel-header">
-          <h2>🔧 Script Refactor</h2>
-          <div class="header-actions">
-            <div class="model-selector">
-              <select id="refactor-model-select">
-                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
-                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="analyzer-panel">
-          <div class="analyzer-input-area">
-            <label>Paste code to refactor — improve readability, split functions, create modules, and remove dead code:</label>
-            <textarea class="analyzer-textarea" id="refactor-code" placeholder="-- Paste messy code here for refactoring..."></textarea>
-            <div class="analyzer-actions">
-              <button class="btn btn-primary" id="btn-run-refactor">🔧 Refactor Script</button>
-              <button class="btn btn-secondary" id="btn-paste-from-editor-refactor">📋 Paste from Editor</button>
-              <button class="btn btn-ghost" id="btn-clear-refactor">Clear</button>
-            </div>
-          </div>
-          <div class="analyzer-results" id="refactor-results">
-            <div class="empty-state">
-              <div class="empty-icon">🔧</div>
-              <h4>No Refactoring Done</h4>
-              <p>Paste a script and click "Refactor" to improve its structure, readability, and modularity.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ AUTO DEBUG PANEL ═══ -->
-      <div class="panel" id="panel-debug">
-        <div class="panel-header">
-          <h2>🐛 Auto Debug</h2>
-          <div class="header-actions">
-            <div class="model-selector">
-              <select id="debug-model-select">
-                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
-                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="analyzer-panel">
-          <div class="analyzer-input-area">
-            <label>Paste code with bugs — Eclipse will identify errors, explain them, and suggest fixes:</label>
-            <textarea class="analyzer-textarea" id="debug-code" placeholder="-- Paste buggy code here..."></textarea>
-            <div class="analyzer-actions">
-              <button class="btn btn-primary" id="btn-run-debug">🐛 Debug Script</button>
-              <button class="btn btn-secondary" id="btn-paste-from-editor-debug">📋 Paste from Editor</button>
-              <button class="btn btn-ghost" id="btn-clear-debug">Clear</button>
-            </div>
-          </div>
-          <div class="analyzer-results" id="debug-results">
-            <div class="empty-state">
-              <div class="empty-icon">🐛</div>
-              <h4>No Debug Results</h4>
-              <p>Paste a script and click "Debug Script" to automatically identify errors, explain problems, and show corrections.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ SETTINGS PANEL ═══ -->
-      <div class="panel" id="panel-settings">
-        <div class="panel-header">
-          <h2>⚙️ Settings</h2>
-        </div>
-        <div class="settings-panel">
-
-          <div class="settings-group">
-            <h3>🔑 API Configuration</h3>
-            <div class="setting-item">
-              <div class="setting-info">
-                <div class="setting-label">Groq API Key</div>
-                <div class="setting-desc">Your Groq Cloud API key for AI model access</div>
-              </div>
-              <input type="password" id="setting-api-key" placeholder="gsk_..." />
-            </div>
-          </div>
-
-          <div class="settings-group">
-            <h3>🤖 Default Models</h3>
-            <div class="setting-item">
-              <div class="setting-info">
-                <div class="setting-label">Code Generation</div>
-                <div class="setting-desc">Model used for generating new scripts and systems</div>
-              </div>
-              <select id="setting-model-generate">
-                <option value="meta-llama/llama-guard-4-12b">GPT-OSS 120B</option>
-                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
-                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
-                <option value="meta-llama/llama-3.1-8b-instant">Llama 3.1 8B</option>
-              </select>
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <div class="setting-label">Code Correction</div>
-                <div class="setting-desc">Model used for fixing and debugging code</div>
-              </div>
-              <select id="setting-model-fix">
-                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
-                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
-                <option value="meta-llama/llama-guard-4-12b">GPT-OSS 120B</option>
-              </select>
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <div class="setting-label">Autocomplete</div>
-                <div class="setting-desc">Model used for inline AI autocomplete</div>
-              </div>
-              <select id="setting-model-autocomplete">
-                <option value="meta-llama/llama-3.1-8b-instant">Llama 3.1 8B</option>
-                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
-              </select>
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <div class="setting-label">Explanations</div>
-                <div class="setting-desc">Model used for explaining code and concepts</div>
-              </div>
-              <select id="setting-model-explain">
-                <option value="qwen/qwen3-32b">Qwen 3 32B</option>
-                <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 3.3 70B</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="settings-group">
-            <h3>🎨 Editor</h3>
-            <div class="setting-item">
-              <div class="setting-info">
-                <div class="setting-label">Font Size</div>
-                <div class="setting-desc">Editor code font size in pixels</div>
-              </div>
-              <input type="number" id="setting-font-size" value="13" min="10" max="24" />
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <div class="setting-label">Tab Size</div>
-                <div class="setting-desc">Number of spaces per indent</div>
-              </div>
-              <input type="number" id="setting-tab-size" value="2" min="1" max="8" />
-            </div>
-          </div>
-
-          <div class="settings-group">
-            <h3>🔌 Roblox Plugin Integration</h3>
-            <div class="setting-item">
-              <div class="setting-info">
-                <div class="setting-label">Plugin Server Port</div>
-                <div class="setting-desc">Local server port for Roblox Studio plugin communication</div>
-              </div>
-              <input type="number" id="setting-plugin-port" value="5500" min="1000" max="65535" />
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <div class="setting-label">Plugin Status</div>
-                <div class="setting-desc">The plugin server starts when Eclipse COPILOT loads</div>
-              </div>
-              <span style="color: var(--neon-green); font-size: 12px;">● Ready (use with Live Server)</span>
-            </div>
-          </div>
-
-          <div class="settings-group">
-            <h3>💾 Data</h3>
-            <div class="setting-item">
-              <div class="setting-info">
-                <div class="setting-label">Clear History</div>
-                <div class="setting-desc">Remove all saved chat and prompt history</div>
-              </div>
-              <button class="btn btn-danger" id="btn-clear-history">Clear All History</button>
-            </div>
-            <div class="setting-item">
-              <div class="setting-info">
-                <div class="setting-label">Export Settings</div>
-                <div class="setting-desc">Download settings as JSON file</div>
-              </div>
-              <button class="btn btn-secondary" id="btn-export-settings">Export</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ HISTORY PANEL ═══ -->
-      <div class="panel" id="panel-history">
-        <div class="panel-header">
-          <h2>📋 History</h2>
-          <div class="header-actions">
-            <button class="btn btn-ghost" id="btn-clear-all-history">Clear All</button>
-          </div>
-        </div>
-        <div class="history-panel">
-          <div class="history-list" id="history-list">
-            <div class="empty-state">
-              <div class="empty-icon">📋</div>
-              <h4>No History Yet</h4>
-              <p>Your conversations and prompts will appear here.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </main>
   </div>
 
-  <!-- ═══════ STATUS BAR ═══════ -->
-  <footer class="statusbar">
-    <div class="status-left">
-      <span class="status-item">
-        <span class="status-dot" id="api-status-dot"></span>
-        <span id="api-status-text">API Ready</span>
-      </span>
-      <span class="status-item" id="active-panel-label">AI Chat</span>
+  <!-- CONNECTION BANNER -->
+  <div class="conn-banner offline" id="connBanner">
+    <div class="conn-left">
+      <div class="conn-dot offline" id="connDot"></div>
+      <div class="conn-text">
+        <div class="conn-status" id="connStatus">Bridge Server desconectado</div>
+        <div class="conn-sub" id="connSub">Inicie o servidor local para conectar ao Roblox Studio</div>
+      </div>
     </div>
-    <div class="status-right">
-      <span class="status-item" id="statusbar-model">Llama 3.3 70B</span>
-      <span class="status-item">Eclipse COPILOT v1.0</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <input class="conn-url" id="bridgeUrl" value="http://127.0.0.1:3001" placeholder="http://127.0.0.1:3001">
+      <button class="btn btn-sm btn-outline" onclick="checkBridge()">Verificar</button>
     </div>
-  </footer>
+  </div>
 
+  <!-- MAIN GENERATOR -->
+  <section id="generator">
+    <div class="main-grid">
+
+      <!-- LEFT: Config -->
+      <div class="panel panel-l">
+        <div class="panel-head">
+          <span class="panel-title">// Configuração</span>
+          <div class="wdots"><span></span><span></span><span></span></div>
+        </div>
+
+        <div class="fg">
+          <label>Provider de IA</label>
+          <select id="providerSel" onchange="onProviderChange()">
+            <option value="">— Selecione —</option>
+            <option value="openai">OpenAI GPT-4o</option>
+            <option value="anthropic">Anthropic Claude 3.5 Sonnet</option>
+            <option value="google">Google Gemini 1.5 Pro</option>
+            <option value="openrouter">OpenRouter (multi-modelo)</option>
+            <option value="groq">Groq (ultra-rápido ⚡)</option>
+          </select>
+        </div>
+
+        <div class="fg sub-select" id="orGroup">
+          <label>Modelo OpenRouter</label>
+          <select id="orModel">
+            <option value="openai/gpt-4o">OpenAI GPT-4o</option>
+            <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+            <option value="google/gemini-pro-1.5">Gemini 1.5 Pro</option>
+            <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
+            <option value="mistralai/mistral-large">Mistral Large</option>
+            <option value="cohere/command-r-plus">Cohere Command R+</option>
+            <option value="deepseek/deepseek-chat">DeepSeek Chat</option>
+            <option value="qwen/qwen-2.5-72b-instruct">Qwen 2.5 72B</option>
+          </select>
+        </div>
+
+        <div class="fg sub-select" id="gqGroup">
+          <label>Modelo Groq</label>
+          <select id="gqModel">
+            <option value="llama-3.1-70b-versatile">Llama 3.1 70B Versatile</option>
+            <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant</option>
+            <option value="llama3-70b-8192">Llama 3 70B</option>
+            <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+            <option value="gemma2-9b-it">Gemma 2 9B</option>
+          </select>
+        </div>
+
+        <div class="fg">
+          <label>API Key</label>
+          <input type="password" id="apiKey" placeholder="sk-... ou sua chave">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="fg">
+            <label>Tipo de Script</label>
+            <select id="scriptType">
+              <option value="Script">Script (Server)</option>
+              <option value="LocalScript">LocalScript (Client)</option>
+              <option value="ModuleScript">ModuleScript</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Serviço</label>
+            <select id="serviceParent">
+              <option value="ServerScriptService">ServerScriptService</option>
+              <option value="StarterPlayerScripts">StarterPlayerScripts</option>
+              <option value="StarterCharacterScripts">StarterCharacterScripts</option>
+              <option value="StarterGui">StarterGui</option>
+              <option value="ReplicatedStorage">ReplicatedStorage</option>
+              <option value="Workspace">Workspace</option>
+              <option value="ServerStorage">ServerStorage</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label>Nome do Script</label>
+          <input type="text" id="scriptName" placeholder="MeuScript" value="EclipseScript">
+        </div>
+
+        <div class="fg">
+          <label>Descrição do script</label>
+          <textarea id="userPrompt" placeholder="Ex: Sistema de rounds com contagem regressiva de 60 segundos, respawn automático dos jogadores e placar de kills..."></textarea>
+        </div>
+
+        <button class="gen-btn" id="genBtn" onclick="generate()">
+          <div class="spinner" id="spinner"></div>
+          <span id="genBtnText">⚡ Gerar Script</span>
+        </button>
+
+        <!-- Quick prompts -->
+        <div class="qp-wrap">
+          <label>Prompts rápidos</label>
+          <div class="qp-grid">
+            <button class="qp-chip" onclick="setPrompt('GUI de shop com botões de compra e sistema de moeda virtual')">Shop GUI</button>
+            <button class="qp-chip" onclick="setPrompt('Sistema de rounds com countdown 60s e respawn automático')">Round System</button>
+            <button class="qp-chip" onclick="setPrompt('Leaderboard com kills e deaths salvo no DataStore2')">Leaderboard</button>
+            <button class="qp-chip" onclick="setPrompt('Admin commands: kick, ban, speed, gravity, teleport')">Admin CMD</button>
+            <button class="qp-chip" onclick="setPrompt('Sistema de quests com progresso e recompensas no DataStore')">Quests</button>
+            <button class="qp-chip" onclick="setPrompt('Inventário com drag and drop e slots de equipamento')">Inventário</button>
+            <button class="qp-chip" onclick="setPrompt('Sistema de clãs com chat privado e ranking de clã')">Clãs</button>
+            <button class="qp-chip" onclick="setPrompt('Mapa day/night cycle com iluminação dinâmica')">Day/Night</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Output -->
+      <div class="panel panel-r">
+        <div class="panel-head">
+          <span class="panel-title">// Output</span>
+          <div class="wdots"><span></span><span></span><span></span></div>
+        </div>
+
+        <div style="position:relative;">
+          <div class="out-code" id="outCode">
+            <div class="out-placeholder" id="placeholder">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                <path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span>Script gerado aparecerá aqui</span>
+            </div>
+          </div>
+          <button class="copy-btn" id="copyBtn" onclick="copyCode()">📋 Copiar</button>
+        </div>
+
+        <button class="send-to-roblox" id="sendBtn" onclick="sendToRoblox()">
+          🎮 Enviar para o Roblox Studio
+        </button>
+
+        <div class="out-meta">
+          <span><span class="stat-dot" id="statDot"></span><span id="statText">Aguardando...</span></span>
+          <span id="tokenInfo" style="color:var(--muted)"></span>
+        </div>
+
+        <!-- Bridge log -->
+        <div class="logs-section">
+          <div class="logs-header">
+            <span class="logs-title">// Bridge Log</span>
+            <button class="btn btn-sm btn-outline" onclick="clearLog()" style="font-size:10px;padding:4px 10px;">limpar</button>
+          </div>
+          <div class="log-box" id="logBox"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" style="margin-top:80px;">
+    <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">// Como funciona</div>
+    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(24px,4vw,42px);letter-spacing:-1.5px;margin-bottom:36px;">3 componentes, 1 fluxo</h2>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:24px;transition:border-color .2s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:52px;color:rgba(0,212,255,.06);line-height:1;margin-bottom:14px;letter-spacing:-2px;">01</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:8px;">Bridge Server</div>
+        <div style="color:var(--muted);font-size:12px;line-height:1.6;">Rode <code style="color:var(--accent)">node server.js</code> na pasta <code style="color:var(--accent)">bridge/</code>. Ele cria uma API local em :3001 que conecta o site ao plugin.</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:24px;transition:border-color .2s;" onmouseenter="this.style.borderColor='var(--purple)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:52px;color:rgba(124,58,237,.08);line-height:1;margin-bottom:14px;letter-spacing:-2px;">02</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:8px;">Plugin Roblox</div>
+        <div style="color:var(--muted);font-size:12px;line-height:1.6;">O plugin faz <em>polling</em> no bridge a cada 2s. Quando recebe um script, aplica automaticamente no Roblox Studio e abre o editor na linha certa.</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:24px;transition:border-color .2s;" onmouseenter="this.style.borderColor='var(--green)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:52px;color:rgba(16,185,129,.06);line-height:1;margin-bottom:14px;letter-spacing:-2px;">03</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:8px;">Este Site</div>
+        <div style="color:var(--muted);font-size:12px;line-height:1.6;">Gera o script via IA (OpenAI, Anthropic, Google, OpenRouter ou Groq) e envia ao bridge com <code style="color:var(--accent)">POST /push-scripts</code>.</div>
+      </div>
+    </div>
+
+    <!-- Setup steps -->
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:24px;margin-top:20px;">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:16px;color:var(--muted);">SETUP RÁPIDO</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <span style="color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;flex-shrink:0;">1.</span>
+          <span style="color:var(--text);font-size:12px;">Baixe a pasta <code style="color:var(--accent)">bridge/</code> e instale Node.js (<a href="https://nodejs.org" style="color:var(--accent)" target="_blank">nodejs.org</a>)</span>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <span style="color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;flex-shrink:0;">2.</span>
+          <span style="color:var(--text);font-size:12px;">No terminal: <code style="color:var(--accent)">cd bridge && node server.js</code></span>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <span style="color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;flex-shrink:0;">3.</span>
+          <span style="color:var(--text);font-size:12px;">Instale <code style="color:var(--accent)">EclipseCopilot_Plugin.lua</code> no Roblox Studio (Plugins → Manage Plugins)</span>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <span style="color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;flex-shrink:0;">4.</span>
+          <span style="color:var(--text);font-size:12px;">No plugin, clique em <strong style="color:var(--green)">Conectar</strong> — o banner aqui ficará verde</span>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <span style="color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;flex-shrink:0;">5.</span>
+          <span style="color:var(--text);font-size:12px;">Gere um script aqui e clique em <strong style="color:var(--green)">Enviar para o Roblox Studio</strong> 🎉</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page -->
+
+<!-- MARQUEE -->
+<div class="marquee" style="position:relative;z-index:1;">
+  <div class="marquee-track" id="mtrack">
+    <div class="m-item"><span class="m-pip"></span>EclipseCopilot</div>
+    <div class="m-item"><span class="m-pip"></span>Bridge Server</div>
+    <div class="m-item"><span class="m-pip"></span>OpenRouter</div>
+    <div class="m-item"><span class="m-pip"></span>Groq Ultra-Fast</div>
+    <div class="m-item"><span class="m-pip"></span>GPT-4o</div>
+    <div class="m-item"><span class="m-pip"></span>Claude 3.5</div>
+    <div class="m-item"><span class="m-pip"></span>Gemini 1.5 Pro</div>
+    <div class="m-item"><span class="m-pip"></span>Llama 3.1 70B</div>
+    <div class="m-item"><span class="m-pip"></span>Scripts Roblox</div>
+    <div class="m-item"><span class="m-pip"></span>LocalScript</div>
+    <div class="m-item"><span class="m-pip"></span>DataStore</div>
+    <div class="m-item"><span class="m-pip"></span>RemoteEvents</div>
+    <div class="m-item"><span class="m-pip"></span>EclipseCopilot</div>
+    <div class="m-item"><span class="m-pip"></span>Bridge Server</div>
+    <div class="m-item"><span class="m-pip"></span>OpenRouter</div>
+    <div class="m-item"><span class="m-pip"></span>Groq Ultra-Fast</div>
+    <div class="m-item"><span class="m-pip"></span>GPT-4o</div>
+    <div class="m-item"><span class="m-pip"></span>Claude 3.5</div>
+    <div class="m-item"><span class="m-pip"></span>Gemini 1.5 Pro</div>
+    <div class="m-item"><span class="m-pip"></span>Llama 3.1 70B</div>
+    <div class="m-item"><span class="m-pip"></span>Scripts Roblox</div>
+    <div class="m-item"><span class="m-pip"></span>LocalScript</div>
+    <div class="m-item"><span class="m-pip"></span>DataStore</div>
+    <div class="m-item"><span class="m-pip"></span>RemoteEvents</div>
+  </div>
 </div>
 
-<!-- Toast Container -->
-<div class="toast-container" id="toast-container"></div>
+<footer style="position:relative;z-index:1;">
+  <div class="footer-logo"><div class="logo-dot"></div>EclipseCopilot</div>
+  <div class="footer-cr">Feito com ⚡ por <a href="#">EclipseCopilot</a><br><span style="font-size:10px;opacity:.5">Roblox Studio AI Agent · Todos os direitos reservados</span></div>
+  <ul class="footer-links">
+    <li><a href="#generator">Gerador</a></li>
+    <li><a href="#how">Docs</a></li>
+  </ul>
+</footer>
 
-<script src="script.js"></script>
+<script>
+/* ── Cursor ────────────────────────────────────── */
+const cur=document.getElementById('cur'),ring=document.getElementById('ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.transform=`translate(${mx-5}px,${my-5}px)`;});
+(function anim(){rx+=(mx-rx)*.13;ry+=(my-ry)*.13;ring.style.transform=`translate(${rx-16}px,${ry-16}px)`;requestAnimationFrame(anim);})();
+
+/* ── State ─────────────────────────────────────── */
+let generatedCode = '';
+let bridgeOnline = false;
+let bridgeCheckInterval = null;
+
+/* ── Provider change ───────────────────────────── */
+function onProviderChange(){
+  document.getElementById('orGroup').classList.toggle('show', document.getElementById('providerSel').value==='openrouter');
+  document.getElementById('gqGroup').classList.toggle('show', document.getElementById('providerSel').value==='groq');
+}
+
+/* ── Quick prompts ─────────────────────────────── */
+function setPrompt(t){document.getElementById('userPrompt').value=t;}
+
+/* ── Copy ──────────────────────────────────────── */
+function copyCode(){
+  if(!generatedCode) return;
+  navigator.clipboard.writeText(generatedCode).then(()=>{
+    const b=document.getElementById('copyBtn');b.textContent='✅ Copiado!';
+    setTimeout(()=>b.textContent='📋 Copiar',2000);
+  });
+}
+
+/* ── Log ───────────────────────────────────────── */
+function addLog(type,msg){
+  const box=document.getElementById('logBox');
+  const now=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const icons={success:'✓',error:'✗',warning:'!',info:'·',apply:'→'};
+  const line=document.createElement('div');
+  line.className='log-line';
+  line.innerHTML=`<span class="log-time">${now}</span><span class="log-icon">${icons[type]||'·'}</span><span class="log-msg ${type}">${msg}</span>`;
+  box.appendChild(line);
+  box.scrollTop=box.scrollHeight;
+  while(box.children.length>60) box.removeChild(box.firstChild);
+}
+function clearLog(){document.getElementById('logBox').innerHTML='';}
+
+/* ── Bridge status ─────────────────────────────── */
+function getBridgeUrl(){return document.getElementById('bridgeUrl').value.replace(/\/$/,'');}
+
+function setConnUI(state){ // 'online'|'offline'|'checking'
+  const banner=document.getElementById('connBanner');
+  const dot=document.getElementById('connDot');
+  const status=document.getElementById('connStatus');
+  const sub=document.getElementById('connSub');
+  dot.className='conn-dot '+state;
+  banner.className='conn-banner '+(state==='online'?'online':'offline');
+  if(state==='online'){
+    status.textContent='Bridge Server conectado ✓';
+    sub.textContent='Plugin Roblox Studio detectado — pronto para receber scripts';
+    bridgeOnline=true;
+  } else if(state==='checking'){
+    status.textContent='Verificando conexão...';
+    sub.textContent='Aguardando resposta do Bridge Server';
+    bridgeOnline=false;
+  } else {
+    status.textContent='Bridge Server desconectado';
+    sub.textContent='Rode: cd bridge && node server.js';
+    bridgeOnline=false;
+  }
+}
+
+async function checkBridge(){
+  setConnUI('checking');
+  try {
+    const r=await fetch(getBridgeUrl()+'/status',{signal:AbortSignal.timeout(3000)});
+    if(!r.ok) throw new Error('bad status');
+    const d=await r.json();
+    if(d.pluginOnline){
+      setConnUI('online');
+    } else {
+      setConnUI('offline');
+      document.getElementById('connSub').textContent='Bridge online, mas plugin não detectado. Clique "Conectar" no plugin.';
+    }
+  } catch(e){
+    setConnUI('offline');
+  }
+}
+
+// Poll bridge status every 3s
+setInterval(checkBridge, 3000);
+checkBridge();
+
+/* ── Build system prompt ───────────────────────── */
+function buildPrompt(request,scriptType,service,name){
+  return `You are an expert Roblox Luau developer. Generate a complete, production-ready ${scriptType} for the Roblox ${service} service.
+
+Script name: ${name}
+User request: ${request}
+
+Requirements:
+- Write complete, working Luau code (Roblox Lua variant)
+- Include all necessary service declarations at the top
+- Add descriptive comments throughout
+- Follow Roblox best practices
+- Handle errors with pcall where appropriate
+- Script type: ${scriptType}, placed in: ${service}
+
+Respond with ONLY the Lua code. No markdown, no backticks, no explanation. Start directly with code or a comment.`;
+}
+
+/* ── Syntax highlight ──────────────────────────── */
+function highlight(code){
+  const kws=['local','function','end','if','then','else','elseif','for','in','do','while','repeat','until','return','and','or','not','true','false','nil','break'];
+  let h=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  h=h.replace(/(--[^\n]*)/g,'<span class="cm">$1</span>');
+  h=h.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,'<span class="str">$1</span>');
+  h=h.replace(/\b(\d+\.?\d*)\b/g,'<span class="num">$1</span>');
+  kws.forEach(k=>h=h.replace(new RegExp(`\\b(${k})\\b`,'g'),'<span class="kw">$1</span>'));
+  h=h.replace(/\b([a-zA-Z_]\w*)\s*(?=\()/g,'<span class="fn">$1</span>');
+  return h;
+}
+
+/* ── Generate script ───────────────────────────── */
+async function generate(){
+  const provider=document.getElementById('providerSel').value;
+  const key=document.getElementById('apiKey').value.trim();
+  const prompt=document.getElementById('userPrompt').value.trim();
+  const scriptType=document.getElementById('scriptType').value;
+  const service=document.getElementById('serviceParent').value;
+  const name=document.getElementById('scriptName').value.trim()||'EclipseScript';
+
+  if(!provider){addLog('error','Selecione um provider!');return;}
+  if(!key){addLog('error','Insira sua API key!');return;}
+  if(!prompt){addLog('error','Descreva o script!');return;}
+
+  const btn=document.getElementById('genBtn');
+  const spinner=document.getElementById('spinner');
+  const btnTxt=document.getElementById('genBtnText');
+  const outCode=document.getElementById('outCode');
+  const copyBtn=document.getElementById('copyBtn');
+  const sendBtn=document.getElementById('sendBtn');
+  const statDot=document.getElementById('statDot');
+  const statTxt=document.getElementById('statText');
+
+  btn.disabled=true;spinner.style.display='block';btnTxt.textContent='Gerando...';
+  outCode.innerHTML='<div class="out-placeholder"><span style="color:var(--accent)">⚡ Gerando via '+provider+'...</span></div>';
+  copyBtn.style.display='none';sendBtn.style.display='none';
+  statDot.className='stat-dot';statTxt.textContent='Consultando IA...';
+  generatedCode='';
+  addLog('info','Gerando script · provider: '+provider+(provider==='openrouter'?' · '+document.getElementById('orModel').value:provider==='groq'?' · '+document.getElementById('gqModel').value:''));
+
+  const sysPrompt=buildPrompt(prompt,scriptType,service,name);
+
+  try {
+    let result='';
+    const headers={'Content-Type':'application/json'};
+
+    if(provider==='openai'){
+      const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{...headers,'Authorization':'Bearer '+key},body:JSON.stringify({model:'gpt-4o',messages:[{role:'user',content:sysPrompt}],max_tokens:4096,temperature:.3})});
+      const d=await r.json();if(d.error)throw new Error(d.error.message);
+      result=d.choices[0].message.content;
+      addLog('info','Tokens: '+(d.usage?.total_tokens||'?'));
+
+    } else if(provider==='anthropic'){
+      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{...headers,'x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-3-5-sonnet-20241022',max_tokens:8192,messages:[{role:'user',content:sysPrompt}]})});
+      const d=await r.json();if(d.error)throw new Error(d.error.message);
+      result=d.content[0].text;
+
+    } else if(provider==='google'){
+      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${key}`,{method:'POST',headers,body:JSON.stringify({contents:[{parts:[{text:sysPrompt}]}],generationConfig:{temperature:.3,maxOutputTokens:8192}})});
+      const d=await r.json();if(d.error)throw new Error(d.error.message);
+      result=d.candidates[0].content.parts[0].text;
+
+    } else if(provider==='openrouter'){
+      const model=document.getElementById('orModel').value;
+      const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{...headers,'Authorization':'Bearer '+key,'HTTP-Referer':location.origin,'X-Title':'EclipseCopilot'},body:JSON.stringify({model,messages:[{role:'user',content:sysPrompt}],max_tokens:4096,temperature:.3})});
+      const d=await r.json();if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
+      result=d.choices[0].message.content;
+      addLog('info','Tokens: '+(d.usage?.total_tokens||'?'));
+
+    } else if(provider==='groq'){
+      const model=document.getElementById('gqModel').value;
+      const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{...headers,'Authorization':'Bearer '+key},body:JSON.stringify({model,messages:[{role:'user',content:sysPrompt}],max_tokens:8192,temperature:.3})});
+      const d=await r.json();if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
+      result=d.choices[0].message.content;
+      addLog('info','Tokens: '+(d.usage?.total_tokens||'?')+' (Groq ⚡)');
+    }
+
+    // Clean markdown
+    result=result.replace(/^```(?:lua|luau)?\n?/i,'').replace(/\n?```$/i,'').trim();
+    generatedCode=result;
+
+    outCode.innerHTML='<button class="copy-btn" id="copyBtn" onclick="copyCode()">📋 Copiar</button>'+highlight(result);
+    document.getElementById('copyBtn').style.display='block';
+    sendBtn.style.display=bridgeOnline?'flex':'none';
+    statDot.className='stat-dot ok';
+    statTxt.textContent='Script gerado ✓';
+    addLog('success','Script gerado com sucesso! ('+result.split('\n').length+' linhas)');
+
+  } catch(e){
+    outCode.innerHTML='<div class="out-placeholder"><span style="color:var(--red)">❌ '+e.message+'</span></div>';
+    statDot.className='stat-dot err';statTxt.textContent='Erro';
+    addLog('error','Erro: '+e.message);
+  }
+
+  btn.disabled=false;spinner.style.display='none';btnTxt.textContent='⚡ Gerar Script';
+}
+
+/* ── Send to Roblox via Bridge ─────────────────── */
+async function sendToRoblox(){
+  if(!generatedCode){addLog('error','Nenhum script gerado ainda.');return;}
+  if(!bridgeOnline){
+    addLog('error','Bridge Server offline. Rode: node server.js');
+    setConnUI('offline');
+    return;
+  }
+
+  const sendBtn=document.getElementById('sendBtn');
+  sendBtn.classList.add('sending');
+  sendBtn.textContent='⏳ Enviando...';
+  addLog('info','Enviando script para o Roblox Studio...');
+
+  const provider=document.getElementById('providerSel').value;
+  const model=provider==='openrouter'?document.getElementById('orModel').value:provider==='groq'?document.getElementById('gqModel').value:provider;
+
+  const payload={
+    prompt: document.getElementById('userPrompt').value,
+    provider,
+    model,
+    scripts:[{
+      name:        document.getElementById('scriptName').value.trim()||'EclipseScript',
+      source:      generatedCode,
+      scriptType:  document.getElementById('scriptType').value,
+      serviceName: document.getElementById('serviceParent').value,
+      actionType:  'NewScript',
+    }],
+  };
+
+  try {
+    const r=await fetch(getBridgeUrl()+'/push-scripts',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload),
+      signal:AbortSignal.timeout(5000),
+    });
+    const d=await r.json();
+    if(d.ok){
+      addLog('success','✓ Script enviado! Job ID: '+d.jobId+'. O plugin irá aplicá-lo em instantes.');
+      sendBtn.textContent='✅ Enviado!';
+      setTimeout(()=>{sendBtn.textContent='🎮 Enviar para o Roblox Studio';sendBtn.classList.remove('sending');},3000);
+    } else {
+      throw new Error(d.error||'Resposta inválida do bridge');
+    }
+  } catch(e){
+    addLog('error','Erro ao enviar: '+e.message);
+    sendBtn.textContent='🎮 Enviar para o Roblox Studio';
+    sendBtn.classList.remove('sending');
+  }
+}
+
+/* ── Show send button when bridge comes online ─── */
+setInterval(()=>{
+  const sendBtn=document.getElementById('sendBtn');
+  if(generatedCode && bridgeOnline && sendBtn.style.display==='none'){
+    sendBtn.style.display='flex';
+  }
+},1000);
+</script>
 </body>
 </html>
