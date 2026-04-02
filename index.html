@@ -3,227 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EclipseCopilot — Roblox AI Script Generator</title>
+    <title>EclipseCopilot — Roblox AI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #070a10; --s1: #0d1322; --s2: #111b30; --s3: #18243e; --border: #1d2d4a; --accent: #00d4ff; --purple: #7c3aed; --green: #10b981; --red: #ef4444; --yellow: #f59e0b; --text: #e2eaf8; --muted: #5a7090; --glow: rgba(0,212,255,0.12); }
-        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
-        body{ background:var(--bg); color:var(--text); font-family:'JetBrains Mono',monospace; font-size:13px; min-height:100vh; overflow-x:hidden; cursor:none;}
-        #cur,#ring{position:fixed;pointer-events:none;z-index:9999;border-radius:50%;}#cur{width:10px;height:10px;background:var(--accent);mix-blend-mode:screen;transition:transform .08s;}#ring{width:32px;height:32px;border:1.5px solid rgba(0,212,255,.35);transition:transform .14s;}
-        body::before{ content:'';position:fixed;inset:0; background-image: linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px), linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px); background-size:44px 44px; pointer-events:none;z-index:0;}
-        nav{ position:fixed;top:0;left:0;right:0;z-index:100; display:flex;align-items:center;justify-content:space-between; padding:16px 48px; background:rgba(7,10,16,.88); backdrop-filter:blur(24px); border-bottom:1px solid var(--border);}
-        .logo{ font-family:'Syne',sans-serif;font-weight:800;font-size:18px; display:flex;align-items:center;gap:10px;letter-spacing:-.3px;}
-        .logo-dot{ width:8px;height:8px;background:var(--accent);border-radius:50%; box-shadow:0 0 10px var(--accent); animation:pulse 2s infinite;}
-        @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
-        nav ul{display:flex;gap:32px;list-style:none;}nav a{color:var(--muted);text-decoration:none;font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:color .2s;}nav a:hover{color:var(--accent);}
-        .nav-btn{background:var(--accent)!important;color:var(--bg)!important;padding:7px 18px;border-radius:4px;font-weight:600!important;}.nav-btn:hover{box-shadow:0 0 20px rgba(0,212,255,.4)!important;}
-        .page{ position:relative;z-index:1; max-width:1160px;margin:0 auto;padding:100px 24px 60px;}
-        .hero{text-align:center;padding:60px 0 48px;}
-        .hero-badge{ display:inline-flex;align-items:center;gap:8px; background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.18); color:var(--accent);font-size:10px;letter-spacing:.16em;text-transform:uppercase; padding:5px 14px;border-radius:100px;margin-bottom:28px; animation:fadeUp .5s ease both;}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-        h1{ font-family:'Syne',sans-serif;font-weight:800; font-size:clamp(44px,7vw,84px);line-height:.95;letter-spacing:-2.5px; margin-bottom:20px;animation:fadeUp .5s .08s ease both;}
-        .h1-plain{color:var(--text);}.h1-grad{ background:linear-gradient(90deg,var(--accent),var(--purple)); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-        .hero-sub{ max-width:480px;margin:0 auto 36px;color:var(--muted);font-size:13px; line-height:1.7;animation:fadeUp .5s .16s ease both;}
-        .hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;animation:fadeUp .5s .24s ease both;}
-        .btn{ display:inline-flex;align-items:center;gap:8px; font-family:'Syne',sans-serif;font-weight:700;font-size:13px; padding:12px 26px;border-radius:6px;border:none; cursor:none;text-decoration:none;transition:all .18s;}
-        .btn-primary{background:var(--accent);color:var(--bg);}.btn-primary:hover{box-shadow:0 0 30px rgba(0,212,255,.4);transform:translateY(-1px);}
-        .btn-outline{background:transparent;color:var(--text);border:1px solid var(--border);}.btn-outline:hover{border-color:var(--accent);transform:translateY(-1px);}
-        .conn-banner{ display:flex;align-items:center;justify-content:space-between; background:var(--s1);border:1px solid var(--border); border-radius:10px;padding:14px 20px;margin-bottom:28px; transition:border-color .3s;}
-        .conn-banner.online{border-color:var(--green);}.conn-banner.offline{border-color:var(--red);}
-        .conn-dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s;}
-        .conn-dot.online{background:var(--green);box-shadow:0 0 10px var(--green);}
-        .conn-dot.offline{background:var(--red);}.conn-url{ background:var(--s3);border:1px solid var(--border);color:var(--accent); font-family:'JetBrains Mono',monospace;font-size:11px; padding:6px 12px;border-radius:5px;outline:none;width:220px;cursor:none;}
-        .main-grid{ display:grid;grid-template-columns:1fr 1fr; gap:2px;background:var(--border);border-radius:12px; overflow:hidden;box-shadow:0 0 60px var(--glow);}
-        .panel{background:var(--s1);padding:26px;}
-        .panel-head{ display:flex;align-items:center;justify-content:space-between; padding-bottom:18px;margin-bottom:20px; border-bottom:1px solid var(--border);}
-        .panel-title{ font-family:'Syne',sans-serif;font-weight:700;font-size:11px; letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
-        .fg{margin-bottom:16px;}label{display:block;font-size:10px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
-        select,input,textarea{ width:100%;background:var(--s2);border:1px solid var(--border); color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px; padding:9px 12px;border-radius:6px;outline:none;cursor:none;}
-        .sub-select{display:none;}.sub-select.show{display:block;}
-        .gen-btn{ width:100%;background:linear-gradient(135deg,var(--accent),var(--purple)); color:#fff;font-family:'Syne',sans-serif;font-weight:700;padding:13px;border:none;border-radius:8px;cursor:none; display:flex;align-items:center;justify-content:center;gap:10px;margin-top:20px;}
-        .out-code{ background:#050810;border:1px solid var(--border);border-radius:8px; padding:14px;font-size:12px;line-height:1.65;color:#a8cfe4;overflow-y:auto; min-height:280px;max-height:420px; white-space:pre-wrap;}
-        .send-to-roblox{ width:100%;margin-top:12px; background:var(--green);color:#fff; font-family:'Syne',sans-serif;font-weight:700;padding:11px;border:none;border-radius:7px;cursor:none; display:none;align-items:center;justify-content:center;gap:8px;}
-        .log-box{ background:var(--s1);border:1px solid var(--border);border-radius:8px; padding:12px;height:130px;overflow-y:auto; font-size:11px;}
-        .log-line{display:flex;gap:10px;margin-bottom:4px;}.log-time{color:var(--muted);}.success{color:var(--green);}.error{color:var(--red);}.apply{color:var(--accent);}
-        .marquee{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:12px 0;margin:60px 0 0;}
-        .marquee-track{display:flex;gap:56px;animation:marquee 22s linear infinite;white-space:nowrap;width:max-content;}
-        @keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+        :root {
+            --bg: #070a10;
+            --s1: #0d1322;
+            --s2: #111b30;
+            --border: #1d2d4a;
+            --accent: #00d4ff;
+            --purple: #7c3aed;
+            --green: #10b981;
+            --red: #ef4444;
+            --text: #e2eaf8;
+            --muted: #5a7090;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #cur, #ring { position: fixed; pointer-events: none; z-index: 9999; border-radius: 50%; }
+        #cur { width: 8px; height: 8px; background: var(--accent); }
+        #ring { width: 24px; height: 24px; border: 1.5px solid rgba(0,212,255,0.3); transition: transform 0.1s ease-out; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+
+        header { text-align: center; margin-bottom: 50px; }
+        h1 { font-family: 'Syne', sans-serif; font-size: 54px; letter-spacing: -2px; margin-bottom: 10px; background: linear-gradient(90deg, var(--accent), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .conn-card {
+            background: var(--s1);
+            border: 1px solid var(--border);
+            padding: 15px 25px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); margin-right: 10px; display: inline-block; }
+        .status-dot.online { background: var(--green); box-shadow: 0 0 10px var(--green); }
+
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .panel { background: var(--s1); border: 1px solid var(--border); border-radius: 12px; padding: 25px; }
+
+        label { display: block; font-size: 10px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: bold; }
+        input, select, textarea {
+            width: 100%;
+            background: var(--s2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 8px;
+            outline: none;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus { border-color: var(--accent); }
+
+        .btn-gen {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .btn-gen:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(124,58,237,0.3); }
+        .btn-gen:disabled { opacity: 0.5; }
+
+        .code-out {
+            background: #050810;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            color: #a8cfe4;
+            font-size: 12px;
+        }
+
+        .btn-send {
+            width: 100%;
+            margin-top: 15px;
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .log-box {
+            margin-top: 20px;
+            height: 100px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 10px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .log-entry { margin-bottom: 4px; border-left: 2px solid var(--muted); padding-left: 8px; }
+        .log-success { border-color: var(--green); color: var(--green); }
+        .log-error { border-color: var(--red); color: var(--red); }
     </style>
 </head>
 <body>
 
 <div id="cur"></div><div id="ring"></div>
 
-<nav>
-    <div class="logo"><div class="logo-dot"></div>EclipseCopilot</div>
-    <ul>
-        <li><a href="#generator">Gerador</a></li>
-        <li><a href="#how">Como usar</a></li>
-        <li><a href="#generator" class="nav-btn">Gerar Script →</a></li>
-    </ul>
-</nav>
+<div class="container">
+    <header>
+        <h1>EclipseCopilot</h1>
+        <p style="color: var(--muted)">AI-Powered Roblox Scripting Bridge</p>
+    </header>
 
-<div class="page">
-    <div class="hero">
-        <div class="hero-badge">⚡ Conectado ao Roblox Studio via Bridge</div>
-        <h1><span class="h1-plain">Scripts Roblox</span><br><span class="h1-grad">direto no Studio.</span></h1>
-        <p class="hero-sub">Descreva o script e envie. EclipseCopilot aplica automaticamente no Roblox Studio.</p>
-    </div>
-
-    <div class="conn-banner offline" id="connBanner">
-        <div class="conn-left" style="display:flex;gap:14px;align-items:center;">
-            <div class="conn-dot offline" id="connDot"></div>
-            <div>
-                <div class="conn-status" id="connStatus">Bridge Server desconectado</div>
-                <div class="conn-sub" style="font-size:10px;color:var(--muted)">Inicie o servidor local para conectar</div>
-            </div>
+    <div class="conn-card">
+        <div>
+            <span id="dot" class="status-dot"></span>
+            <span id="status-text">Bridge Offline</span>
         </div>
-        <div style="display:flex;gap:10px;">
-            <input class="conn-url" id="bridgeUrl" value="http://127.0.0.1:3001">
-            <button class="btn btn-outline" style="padding:5px 15px;font-size:11px;" onclick="checkBridge()">Verificar</button>
+        <div style="display: flex; gap: 10px;">
+            <input id="bridgeUrl" value="http://127.0.0.1:3001" style="margin: 0; width: 200px; padding: 5px 10px;">
+            <button onclick="checkBridge()" style="background: var(--border); color: white; border: none; padding: 5px 15px; border-radius: 5px;">Reconectar</button>
         </div>
     </div>
 
-    <section id="generator">
-        <div class="main-grid">
-            <div class="panel">
-                <div class="panel-head"><span class="panel-title">// Configuração</span></div>
-                <div class="fg">
-                    <label>Provider</label>
-                    <select id="providerSel" onchange="onProviderChange()">
-                        <option value="openrouter">OpenRouter</option>
-                        <option value="groq">Groq</option>
+    <div class="main-grid">
+        <div class="panel">
+            <label>API Key (OpenRouter)</label>
+            <input type="password" id="apiKey" placeholder="sk-or-v1-...">
+
+            <label>Modelo</label>
+            <select id="model">
+                <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
+                <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+                <option value="deepseek/deepseek-chat">DeepSeek V3</option>
+            </select>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>Tipo</label>
+                    <select id="scriptType">
+                        <option value="Script">Server Script</option>
+                        <option value="LocalScript">LocalScript</option>
+                        <option value="ModuleScript">ModuleScript</option>
                     </select>
                 </div>
-                <div class="fg sub-select show" id="orGroup">
-                    <label>Modelo OpenRouter</label>
-                    <select id="orModel">
-                        <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
-                        <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                        <option value="openai/gpt-4o">GPT-4o</option>
-                    </select>
+                <div>
+                    <label>Nome</label>
+                    <input type="text" id="scriptName" value="EclipseGenerated">
                 </div>
-                <div class="fg">
-                    <label>API Key</label>
-                    <input type="password" id="apiKey" placeholder="sk-...">
-                </div>
-                <div class="fg">
-                    <label>Tipo e Nome</label>
-                    <div style="display:flex;gap:10px;">
-                        <select id="scriptType"><option value="Script">Script</option><option value="LocalScript">LocalScript</option></select>
-                        <input type="text" id="scriptName" value="EclipseScript">
-                    </div>
-                </div>
-                <div class="fg">
-                    <label>Descrição</label>
-                    <textarea id="userPrompt" placeholder="O que o script deve fazer?"></textarea>
-                </div>
-                <button class="gen-btn" id="genBtn" onclick="generate()">⚡ Gerar Script</button>
             </div>
 
-            <div class="panel">
-                <div class="panel-head"><span class="panel-title">// Output</span></div>
-                <div class="out-code" id="outCode">
-                    <div id="placeholder" style="text-align:center;padding-top:100px;color:var(--muted)">Aguardando geração...</div>
-                </div>
-                <button class="send-to-roblox" id="sendBtn" onclick="sendToRoblox()">🎮 Enviar para o Studio</button>
-                <div class="logs-section" style="margin-top:20px;">
-                    <div class="log-box" id="logBox"></div>
-                </div>
+            <label>Prompt do Script</label>
+            <textarea id="prompt" rows="6" placeholder="Ex: Sistema de inventário com DataStore..."></textarea>
+
+            <button class="btn-gen" id="genBtn" onclick="generateScript()">⚡ Gerar Script</button>
+        </div>
+
+        <div class="panel">
+            <label>Output Luau</label>
+            <div class="code-out" id="codeOut">-- O código aparecerá aqui...</div>
+            
+            <button class="btn-send" id="sendBtn" onclick="sendToStudio()">🎮 Enviar para o Roblox Studio</button>
+
+            <div class="log-box" id="logs">
+                <div class="log-entry">Sistema iniciado. Aguardando comando...</div>
             </div>
         </div>
-    </section>
+    </div>
 </div>
 
 <script>
-    const cur=document.getElementById('cur'), ring=document.getElementById('ring');
-    let mx=0, my=0, rx=0, ry=0, generatedCode = '';
+    // Cursor Logic
+    const cur = document.getElementById('cur'), ring = document.getElementById('ring');
+    let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
 
-    document.addEventListener('mousemove', e => {
-        mx=e.clientX; my=e.clientY;
-        cur.style.transform=`translate(${mx-5}px,${my-5}px)`;
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX; mouseY = e.clientY;
+        cur.style.left = mouseX + 'px'; cur.style.top = mouseY + 'px';
     });
 
-    (function anim(){
-        rx+=(mx-rx)*.13; ry+=(my-ry)*.13;
-        ring.style.transform=`translate(${rx-16}px,${ry-16}px)`;
-        requestAnimationFrame(anim);
-    })();
+    function tick() {
+        ringX += (mouseX - ringX - 12) * 0.15;
+        ringY += (mouseY - ringY - 12) * 0.15;
+        ring.style.left = ringX + 'px'; ring.style.top = ringY + 'px';
+        requestAnimationFrame(tick);
+    }
+    tick();
 
-    function onProviderChange(){
-        document.getElementById('orGroup').classList.toggle('show', document.getElementById('providerSel').value==='openrouter');
+    // App Logic
+    function log(msg, type = '') {
+        const box = document.getElementById('logs');
+        const div = document.createElement('div');
+        div.className = `log-entry ${type ? 'log-'+type : ''}`;
+        div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        box.prepend(div);
     }
 
-    function addLog(type, msg){
-        const box=document.getElementById('logBox');
-        const line=document.createElement('div');
-        line.className='log-line';
-        line.innerHTML=`<span class="log-time">${new Date().toLocaleTimeString()}</span> <span class="${type}">${msg}</span>`;
-        box.appendChild(line);
-        box.scrollTop=box.scrollHeight;
-    }
-
-    async function checkBridge(){
+    async function checkBridge() {
         const url = document.getElementById('bridgeUrl').value;
         try {
-            await fetch(`${url}/poll`);
-            document.getElementById('connBanner').className = 'conn-banner online';
-            document.getElementById('connDot').className = 'conn-dot online';
-            document.getElementById('connStatus').innerText = 'Bridge Conectado';
-            addLog('success', 'Bridge detectado com sucesso.');
-        } catch(e) {
-            document.getElementById('connBanner').className = 'conn-banner offline';
-            addLog('error', 'Bridge não encontrado.');
+            const res = await fetch(`${url}/status`);
+            if(res.ok) {
+                document.getElementById('dot').className = 'status-dot online';
+                document.getElementById('status-text').innerText = 'Bridge Online';
+                return true;
+            }
+        } catch (e) {
+            document.getElementById('dot').className = 'status-dot';
+            document.getElementById('status-text').innerText = 'Bridge Offline';
+            return false;
         }
     }
+    setInterval(checkBridge, 5000);
 
-    async function generate(){
-        const btn=document.getElementById('genBtn'), key=document.getElementById('apiKey').value, prompt=document.getElementById('userPrompt').value;
-        if(!key || !prompt) return addLog('error', 'Falta API Key ou Prompt.');
+    async function generateScript() {
+        const key = document.getElementById('apiKey').value;
+        const promptText = document.getElementById('prompt').value;
+        const genBtn = document.getElementById('genBtn');
 
-        btn.disabled=true; btn.innerText='Processando...';
-        addLog('apply', 'Solicitando IA...');
+        if(!key || !promptText) return log("Falta API Key ou Prompt", "error");
+
+        genBtn.disabled = true;
+        genBtn.innerText = "Gerando...";
+        log("Solicitando código à IA...");
 
         try {
-            const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                 method: "POST",
-                headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+                headers: {
+                    "Authorization": `Bearer ${key}`,
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({
-                    "model": document.getElementById('orModel').value,
-                    "messages": [{ "role": "system", "content": "Roblox Luau expert. No comments. Only code." }, { "role": "user", "content": prompt }]
+                    "model": document.getElementById('model').value,
+                    "messages": [
+                        { "role": "system", "content": "You are a Roblox Luau expert. Output ONLY code. No markdown blocks, no comments, no explanations." },
+                        { "role": "user", "content": promptText }
+                    ]
                 })
             });
-            const data = await res.json();
-            generatedCode = data.choices[0].message.content.replace(/```lua|```/g, "");
-            document.getElementById('outCode').innerText = generatedCode;
-            document.getElementById('placeholder').style.display='none';
-            document.getElementById('sendBtn').style.display='flex';
-            addLog('success', 'Script pronto.');
-        } catch(e) {
-            addLog('error', 'Erro na API.');
+
+            const data = await response.json();
+            const code = data.choices[0].message.content.trim();
+            
+            document.getElementById('codeOut').innerText = code;
+            document.getElementById('sendBtn').style.display = 'block';
+            log("Script gerado com sucesso!", "success");
+
+        } catch (e) {
+            log("Erro ao gerar script", "error");
         } finally {
-            btn.disabled=false; btn.innerText='⚡ Gerar Script';
+            genBtn.disabled = false;
+            genBtn.innerText = "⚡ Gerar Script";
         }
     }
 
-    async function sendToRoblox(){
-        const url = document.getElementById('bridgeUrl').value;
+    async function sendToStudio() {
+        const bridge = document.getElementById('bridgeUrl').value;
+        const payload = {
+            name: document.getElementById('scriptName').value,
+            type: document.getElementById('scriptType').value,
+            content: document.getElementById('codeOut').innerText
+        };
+
         try {
-            await fetch(`${url}/push-scripts`, {
+            const res = await fetch(`${bridge}/push-scripts`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: document.getElementById('scriptName').value,
-                    type: document.getElementById('scriptType').value,
-                    content: generatedCode
-                })
+                body: JSON.stringify(payload)
             });
-            addLog('success', 'Script enviado ao Studio!');
-        } catch(e) {
-            addLog('error', 'Falha ao enviar.');
+
+            if(res.ok) log("Script enviado para a fila do Studio!", "success");
+        } catch (e) {
+            log("Falha ao enviar para o Bridge. Verifique o console.", "error");
         }
     }
 </script>
+
 </body>
 </html>
